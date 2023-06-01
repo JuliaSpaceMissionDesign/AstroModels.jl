@@ -10,7 +10,7 @@ Data container for spherical harmonics data from the Geosciences Node of NASA's
 - `radius` -- reference radius of the spherical harmonic development (km)
 - `max_degree` -- maximum degree of the model 
 - `normalized` -- normalized coefficients
-- `has_unc` -- if the coefficients has uncertainty
+- `uncertainty` -- if the coefficients has uncertainty
 - `Clm, Slm` -- spherical harmonics constants
 - `Clm_unc, Slm_unc` -- spherical harmonics constants uncertainty
 """
@@ -92,4 +92,3 @@ function parse_data(::Type{T}, ::Type{PDSGravityHarmonicsData}, filename::Abstra
         Clm, Slm, ClmUnc, SlmUnc
         )
 end
-
