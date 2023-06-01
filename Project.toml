@@ -1,0 +1,8 @@
+name = "AstrodynamicModels"
+uuid = "fdad552a-7c47-4dcb-8ced-7e65d4ea3d40"
+authors = ["Andrea Pasquale <andrea.pasquale@polimi.it>"]
+version = "0.1.0"
+
+[deps]
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+JSMDInterfaces = "6b30ee2f-618e-4a15-bf4e-7df7b496e609"
