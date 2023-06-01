@@ -1,3 +1,3 @@
-abstract type AbstractGravityModelData{T} <: AbstractJSMDModelData{T} end
+abstract type AbstractGravityModelData <: AbstractJSMDModelData end
 
-abstract type AbstractGravityModel{T} <: AbstractJSMDModel{T} end
+abstract type AbstractGravityModel <: AbstractJSMDModel end

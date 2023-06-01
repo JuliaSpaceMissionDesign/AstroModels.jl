@@ -114,7 +114,7 @@ Data container for ICGEM spherical harmonics gfc data.
 ### References 
 - http://icgem.gfz-potsdam.de/ICGEM-Format-2011.pdf
 """
-struct GravityHarmonicsICGEMData{T, N} <: AbstractGravityModelData{T}
+struct GravityHarmonicsICGEMData{N, T} <: AbstractGravityModelData
     # Mandatory keywords
     modelname::Symbol 
     μ::T # km³/s²
@@ -155,7 +155,7 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::Abst
         length(line) < 1 && continue
 
         if line[1] == "begin_of_head"
-            if begin_of_head_found 
+            if boh_found 
                 throw(
                     LoadError(
                         filename, current_line, 
@@ -169,8 +169,7 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::Abst
             eoh_found = true
             header_line_end   = current_line
             break
-        end
-        if boh_found && (current_line != header_line_start)
+        else boh_found && (current_line != header_line_start)
             push!(header, join(line, " "))
         end
     end
@@ -186,8 +185,8 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::Abst
     end
 
     DATA =  Dict(
-        :product_type => missing, :modelname => missing, :gravity_constant => 0.0,
-        :radius => 0.0, :max_degree => 0, :errors => :formal, :tide_system => :zero_tide,
+        :product_type => :unknown, :modelname => :unknown, :gravity_constant => zero(T),
+        :radius => zero(T), :max_degree => 0, :errors => :formal, :tide_system => :zero_tide,
         :norm => :fully_normalized,
     )
 
