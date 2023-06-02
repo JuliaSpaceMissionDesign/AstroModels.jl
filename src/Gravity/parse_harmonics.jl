@@ -4,7 +4,7 @@
 # ----------------------------------
 
 """
-    GravityHarmonicsPDSData{N, T} <: AbstractGravityModelData{T}
+    GravityHarmonicsPDSData{N, T} <: AbstractGravityHarmonicsData{N, T}
 
 Data container for spherical harmonics data from the Geosciences Node of NASA's 
 [Planetary Data System (PDS)](https://pds-geosciences.wustl.edu/default.htm).
@@ -21,7 +21,7 @@ Data container for spherical harmonics data from the Geosciences Node of NASA's
 ### References 
 - https://pds-geosciences.wustl.edu/dataserv/gravity_model_desc.htm
 """
-struct GravityHarmonicsPDSData{N, T} <: AbstractGravityModelData
+struct GravityHarmonicsPDSData{N, T} <: AbstractGravityHarmonicsData{N, T}
     μ::T # km³/s²
     radius::T # km
     max_degree::Int
@@ -95,7 +95,7 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsPDSData}, filename::Abstra
 end
 
 """
-    GravityHarmonicsICGEMData{N, T} <: AbstractGravityModelData{T}
+    GravityHarmonicsICGEMData{N, T} <: AbstractGravityHarmonicsData{N, T}
 
 Data container for ICGEM spherical harmonics gfc data.
 
@@ -114,7 +114,7 @@ Data container for ICGEM spherical harmonics gfc data.
 ### References 
 - http://icgem.gfz-potsdam.de/ICGEM-Format-2011.pdf
 """
-struct GravityHarmonicsICGEMData{N, T} <: AbstractGravityModelData
+struct GravityHarmonicsICGEMData{N, T} <: AbstractGravityHarmonicsData{N, T}
     # Mandatory keywords
     modelname::Symbol 
     μ::T # km³/s²
@@ -132,6 +132,26 @@ struct GravityHarmonicsICGEMData{N, T} <: AbstractGravityModelData
     Slm_unc::Vector{T}
 end
 
+function Base.show(io::IO, gd::GravityHarmonicsICGEMData{N, T}) where {N, T}
+    println(io, "GravityHarmonicsICGEMData{$N, $T}(norm=$(gd.norm), tide=$(gd.tide_system))")
+end
+
+"""
+    parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::AbstractString;
+        maxdegree::Int=-1) where T
+
+Parse data associated to a `GravityHarmonics` model from International Centre for Global 
+Earth Models `gfc` models.
+
+### Fields
+
+- `filename` -- name of the file to be parsed 
+- `maxdegree` -- maximum degree of the harmonics to be saved in memory after reading. 
+                 Optional, default is -1 indicating that all the coefficients shall be loaded.
+
+### References
+- http://icgem.gfz-potsdam.de/ICGEM-Format-2023.pdf
+"""
 function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::AbstractString; 
     maxdegree::Int=-1) where T 
 
