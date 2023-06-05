@@ -1,5 +1,12 @@
 export GravityHarmonics
 
+"""
+    GravityHarmonics{T} <: AbstractGravityModel
+
+Type to handle the gravity harmonics models within the JSMD context. User defined `degree` 
+and `order` can be supplied using the [`parse_model`](@ref) constructor associated with 
+the `GravityHarmonics` type.
+"""
 struct GravityHarmonics{T} <: AbstractGravityModel
     degree::Int
     order::Int 
@@ -39,8 +46,15 @@ function GravityHarmonics(degree::Int, order::Int, μ::T, radius::T,
     return GravityHarmonics{T}(degree, order, μ, radius, Clm, Slm, cosl, sinl, Plm)
 end
 
-function _parse_gravity_harmonics(data::AbstractGravityHarmonicsData{N, T}, 
-    degree::Int, order::Int) where {N, T}
+"""
+    parse_model(::Type{T}, ::Type{GravityHarmonics}, d::AbstractGravityHarmonicsData{N, T}, 
+        degree::Int, order::Int=degree, args...) where {T, N}
+
+Parse a [`GravityHarmonics`](@ref) type from a [`AbstractGravityHarmonicsData`](@ref) data container
+subtype and a desired expansion `degree` and `order`.
+"""
+function parse_model(::Type{T}, ::Type{GravityHarmonics}, d::AbstractGravityHarmonicsData{N, T}, 
+    degree::Int, order::Int=degree, args...) where {T, N}
     if data.normalized
         Clm_ = convert(Matrix{T}, @views(data.Clm[1:degree+1, 1:order+1]))
         Slm_ = convert(Matrix{T}, @views(data.Slm[1:degree+1, 1:order+1]))
@@ -48,9 +62,4 @@ function _parse_gravity_harmonics(data::AbstractGravityHarmonicsData{N, T},
     else
         throw(NotImplementedError("handling unnormalized coefficients currently not supported"))
     end
-end
-
-function parse_model(::Type{T}, ::Type{GravityHarmonics}, d::AbstractGravityHarmonicsData{N, T}, 
-    degree::Int, order::Int=degree) where {T, N}
-    return _parse_gravity_harmonics(d, degree, order)
 end
