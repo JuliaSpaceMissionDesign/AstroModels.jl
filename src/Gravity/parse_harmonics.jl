@@ -1,3 +1,4 @@
+export GravityHarmonicsICGEMData, GravityHarmonicsPDSData
 
 # ----------------------------------
 # PDS gravity harmonics data (SHA)
@@ -16,7 +17,6 @@ Data container for spherical harmonics data from the Geosciences Node of NASA's
 - `max_degree` -- maximum degree of the model 
 - `normalized` -- normalized coefficients
 - `Clm, Slm` -- spherical harmonics constants
-- `Clm_unc, Slm_unc` -- spherical harmonics constants uncertainty
 
 ### References 
 - https://pds-geosciences.wustl.edu/dataserv/gravity_model_desc.htm
@@ -25,12 +25,12 @@ struct GravityHarmonicsPDSData{N, T} <: AbstractGravityHarmonicsData{N, T}
     μ::T # km³/s²
     radius::T # km
     max_degree::Int
+
     normalized::Bool
 
-    Clm::Vector{T}
-    Slm::Vector{T}
-    Clm_unc::Vector{T}
-    Slm_unc::Vector{T}
+    # Coefficients
+    Clm::Matrix{T}
+    Slm::Matrix{T}
 end
 
 function Base.show(io::IO, gd::GravityHarmonicsPDSData{N, T}) where {N, T}
@@ -43,7 +43,7 @@ end
 
 Parse data associated to a `GravityHarmonics` model from NASA's PDS SHA files.
 
-### Fields
+### Parameters
 
 - `filename` -- name of the file to be parsed 
 - `maxdegree` -- maximum degree of the harmonics to be saved in memory after reading. 
@@ -75,22 +75,29 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsPDSData}, filename::Abstra
     if maxdegree == -1 
         maxdegree = deg  
     end 
-       
-    # Number of rows 
-    rows = Int(1/2*(maxdegree+1)*(maxdegree+2)-1)
-    
+
     # Load delimited file
     raw_sha = readdlm(filename, ','; skipstart=1)
-    raw_sha = raw_sha[1:rows, :]
+    raw_sha = raw_sha[1:end, :]
 
     # Extract coefficients
-    @views Clm = convert(Vector{T}, raw_sha[:, 3])
-    @views Slm = convert(Vector{T}, raw_sha[:, 4])
-    @views ClmUnc = convert(Vector{T}, raw_sha[:, 5])
-    @views SlmUnc = convert(Vector{T}, raw_sha[:, 6])
+    Clm = zeros(maxdegree+1, maxdegree+1)
+    Slm = zeros(maxdegree+1, maxdegree+1)
+    for row in eachrow(raw_sha) 
+        i = Int(row[1]+1)
+        j = Int(row[2]+1)
+        if i <= maxdegree+1
+            if j <= maxdegree+1
+                Clm[i, j] = row[3]
+                Slm[i, j] = row[4]
+            end
+        else 
+            break
+        end
+    end
 
     return GravityHarmonicsPDSData{maxdegree, T}(
-        μ, radius, maxdegree, normalized, Clm, Slm, ClmUnc, SlmUnc
+        μ, radius, maxdegree, normalized, Clm, Slm
         )
 end
 
@@ -100,40 +107,31 @@ end
 Data container for ICGEM spherical harmonics gfc data.
 
 ### Fields 
-
-- `modelname` -- name of the model 
 - `μ` -- gravitational constant (km³/s²)
 - `radius` -- reference radius of the spherical harmonic development (km)
 - `max_degree` -- maximum degree of the model 
-- `errors` -- errors model 
-- `norm` -- normalization 
+- `normalized` -- normalization 
 - `tide_system` -- tides used in the model development
 - `Clm, Slm` -- spherical harmonics constants
-- `Clm_unc, Slm_unc` -- spherical harmonics constants
 
 ### References 
 - http://icgem.gfz-potsdam.de/ICGEM-Format-2011.pdf
 """
-struct GravityHarmonicsICGEMData{N, T} <: AbstractGravityHarmonicsData{N, T}
-    # Mandatory keywords
-    modelname::Symbol 
+struct GravityHarmonicsICGEMData{N, T}
     μ::T # km³/s²
     radius::T # km
     max_degree::Int
-    errors::Symbol
 
-    # Optinal keywords
-    norm::Symbol 
+    normalized::Bool 
     tide_system::Symbol 
 
-    Clm::Vector{T}
-    Slm::Vector{T}
-    Clm_unc::Vector{T}
-    Slm_unc::Vector{T}
+    # Coefficients
+    Clm::Matrix{T}
+    Slm::Matrix{T}
 end
 
 function Base.show(io::IO, gd::GravityHarmonicsICGEMData{N, T}) where {N, T}
-    println(io, "GravityHarmonicsICGEMData{$N, $T}(norm=$(gd.norm), tide=$(gd.tide_system))")
+    println(io, "GravityHarmonicsICGEMData{$N, $T}(norm=$(gd.normalized), tide=$(gd.tide_system))")
 end
 
 """
@@ -143,7 +141,7 @@ end
 Parse data associated to a `GravityHarmonics` model from International Centre for Global 
 Earth Models `gfc` models.
 
-### Fields
+### Parameters
 
 - `filename` -- name of the file to be parsed 
 - `maxdegree` -- maximum degree of the harmonics to be saved in memory after reading. 
@@ -154,7 +152,6 @@ Earth Models `gfc` models.
 """
 function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::AbstractString; 
     maxdegree::Int=-1) where T 
-
     file = open(filename, "r")
 
     # --------------------------------------------------------------------------------------
@@ -206,12 +203,12 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::Abst
 
     DATA =  Dict(
         :product_type => :unknown, :modelname => :unknown, :gravity_constant => zero(T),
-        :radius => zero(T), :max_degree => 0, :errors => :formal, :tide_system => :zero_tide,
+        :radius => zero(T), :max_degree => 0, :tide_system => :zero_tide,
         :norm => :fully_normalized,
     )
 
     MANDATORY_KEYS = (
-        :product_type, :modelname, :gravity_constant, :radius, :max_degree, :errors
+        :product_type, :modelname, :gravity_constant, :radius, :max_degree
     )
 
     # Mandatory
@@ -233,11 +230,6 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::Abst
 
     if DATA[:product_type] != :gravity_field
         throw(ErrorException("Only ICGEM files of type :gravity_field are supported."))
-    end
-
-    if !(DATA[:errors] in (:no, :calibrated, :formal, :calibrated_and_formal))
-        @warn("Invalid ICGEM format: The error type is not valid! Assuming :formal.")
-        DATA[:errors] = :formal
     end
 
     # Optional 
@@ -264,14 +256,7 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::Abst
 
     # --------------------------------------------------------------------------------------
     # Read coefficients
-
     raw = readdlm(filename; skipstart=header_line_end+1)
-    raw_nogfc = @views raw[ raw[:,1] .!= "gfc", :]
-    if !isempty(raw_nogfc)
-        throw(
-            ErrorException("Unsupported ICGEM format: Only the keywords \"gfc\" are parsed.")
-        )
-    end 
 
     deg = Int(DATA[:max_degree])  
     # Maximum degree check
@@ -280,50 +265,47 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::Abst
     elseif maxdegree > deg 
         throw(ArgumentError("Maximum degree provided ($maxdegree) is greater than the one in the file ($deg)."))
     end 
-       
-    # Number of rows 
-    rows = Int(1/2*(maxdegree+1)*(maxdegree+2)-1)
-
-    # Raw gfc data
-    raw_gfc   = @views raw[1:rows, :]
-
-    errors = DATA[:errors]
-    # Check if the number of columns is correct.
-    if errors == :no
-        size(raw_gfc, 2) != 5 &&
-        throw(ErrorException("Invalid ICGME format: the coefficients table must have 5 columns because the keyword errors is \"$errors\"."))
-    elseif (errors == :calibrated) || (errors == :formal)
-        size(raw_gfc, 2) != 7 &&
-        throw(ErrorException("Invalid ICGME format: the coefficients table must have 7 columns because the keyword errors is \"$errors\"."))
-    else
-        size(raw_gfc, 2) != 9 &&
-        throw(ErrorException("Invalid ICGME format: the coefficients table must have 9 columns because the keyword errors is \"$errors\"."))
-    end
 
     # Check if there is any number to be converted. In this case, we assume that
     # the number is written in FORTRAN format.
-    raw_gfc_coefs = @view(raw_gfc[:, 4:end])
-    for i in eachindex(raw_gfc_coefs)
-        if !(typeof(raw_gfc_coefs[i]) <: AbstractFloat)
+    raw_coefs = @view(raw[:, 4:6])
+    for i in eachindex(raw_coefs)
+        if !(typeof(raw_coefs[i]) <: AbstractFloat)
             try
-                data             = replace(raw_gfc_coefs[i], r"[D,d]" => "e")
-                raw_gfc_coefs[i] = parse(T, data)
+                data             = replace(raw_coefs[i], r"[D,d]" => "e")
+                raw_coefs[i] = parse(T, data)
             catch e
                 throw(
-                    ErrorException("Invalid ICGME format: could not convert the coefficient \"$(raw_gfc_coefs[i])\" to a $(T).")
+                    ErrorException("Invalid ICGME format: could not convert the coefficient \"$(raw_coefs[i])\" to a $(T).")
                 )
             end
         end
     end
-    @views Clm = convert(Vector{T}, raw_gfc[:, 4])
-    @views Slm = convert(Vector{T}, raw_gfc[:, 5])
-    @views ClmUnc = convert(Vector{T}, raw_gfc[:, 6])
-    @views SlmUnc = convert(Vector{T}, raw_gfc[:, 7])
 
-    return GravityHarmonicsICGEMData{maxdegree, T}(
-        DATA[:modelname],
+    # Parse the coefficients matrices
+    # At the moment only STATIC coefficients (in time) are considered
+    Clm = zeros(maxdegree+1, maxdegree+1)
+    Slm = zeros(maxdegree+1, maxdegree+1)
+    for row in eachrow(raw)
+        # looping over gfc or gfct lines only
+        if row[1] in ("gfc", "gfct")
+            i = row[2]+1
+            j = row[3]+1
+            if i <= maxdegree+1
+                if j <= maxdegree+1
+                    Clm[i, j] = row[4]
+                    Slm[i, j] = row[5]
+                end
+            end
+        end
+    end
+
+    return GravityHarmonicsICGEMData{maxdegree+1, T}(
         DATA[:gravity_constant]/1e9, # to km^3/s^2
         DATA[:radius]/1e3, # to km 
-        maxdegree, DATA[:errors], DATA[:norm], DATA[:tide_system], Clm, Slm, ClmUnc, SlmUnc
+        maxdegree, 
+        DATA[:norm] == :fully_normalized, 
+        DATA[:tide_system], 
+        Clm, Slm
     )
 end
