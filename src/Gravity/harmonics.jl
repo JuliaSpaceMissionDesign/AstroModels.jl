@@ -1,84 +1,56 @@
 export GravityHarmonics
 
-struct GravityHarmonics{N, T} <: AbstractGravityModel
+struct GravityHarmonics{T} <: AbstractGravityModel
     degree::Int
+    order::Int 
 
     # Parameters
     μ::T 
     radius::T 
 
     # Coefficients
-    Clm::Vector{T}
-    Slm::Vector{T}
-
-    # Factors 
-    η::Vector{T}
+    Clm::Matrix{T}
+    Slm::Matrix{T}
 
     # Cache
     cosl::Vector{T}
     sinl::Vector{T}
-    Plm::Vector{T}
+    Plm::Matrix{T}
 end
 
-function Base.show(io::IO, ::GravityHarmonics{N, T}) where {N, T}
-    println(io, "GravityHarmonics{$N, $T}()")
+function Base.show(io::IO, g::GravityHarmonics{T}) where {T}
+    println(io, "GravityHarmonics{$T}(degree=$(g.degree), order=$(g.order))")
 end
 
-function GravityHarmonics(deg::Int, μ::T, radius::T, Clm::Vector{T}, Slm::Vector{T}) where T
-    # Check if the dimension of the Clm, Slm coefficients are compatible with
-    # the desired degree
-    cdim = Int(1/2*(deg+1)*(deg+2))
-    if length(Clm) != cdim-1 || length(Slm) != cdim-1
+function GravityHarmonics(degree::Int, order::Int, μ::T, radius::T, 
+    Clm::Matrix{T}, Slm::Matrix{T}) where T
+
+    if !all(size(Clm) .== size(Slm))
         throw(ErrorException("GravityHarmonics initialized with the wrong number of coefficients."))
     end
 
-    # Pre-allocate factors 
-    η = _compute_factors(T, deg)
-
-    # Pre-initialises the cache
-    cosl = zeros(T, deg+1)
-    sinl = zeros(T, deg+1)
-    Plm = zeros(T, Int(1/2*(deg+3)*(deg+4)))
-    return GravityHarmonics{deg, T}(deg, μ, radius, Clm, Slm, η, cosl, sinl, Plm)
-end
-
-function _compute_factors(::Type{T}, deg::Int) where {T}
-    η = zeros(T, Int(1/2*(deg+3)*(deg+4)))
-    @inbounds η[2] = 1.
-    @inbounds for j = 2:deg+2 
-        k = j + 1
-        crt = (k*(k+1))÷2
-        @simd for k = 0:j-1 
-            if k == 0
-                @fastmath η[crt-j+k] = sqrt(0.5*(j+k+1)*(j-k))
-            else 
-                @fastmath η[crt-j+k] = sqrt((j+k+1)*(j-k))
-            end
-        end 
-    end 
-    η
-end
-
-function _parse_normalized_harmonics(d::D, degree::Int) where {D<:AbstractGravityHarmonicsData}
-    if degree > d.max_degree 
-        throw(DomainError(degree, "GravityHarmonics required degree ($degree) higher than the data one ($(d.max_degree))"))
+    if size(Clm) != (degree+1, order+1)
+        throw(ErrorException("GravityHarmonics coefficients are not of dimension ($(degree+1), $(order+1))."))
     end
-    cdim = Int(1/2*(degree+1)*(degree+2))
-    return GravityHarmonics(degree, d.μ, d.radius, d.Clm[1:cdim-1], d.Slm[1:cdim-1])
+
+    cosl = zeros(T, degree+1)
+    sinl = zeros(T, degree+1)
+    Plm = zeros(T, degree+1, order+1)
+    return GravityHarmonics{T}(degree, order, μ, radius, Clm, Slm, cosl, sinl, Plm)
 end
 
-function parse_model(::Type{T}, ::Type{GravityHarmonics}, d::GravityHarmonicsICGEMData{N, T}, 
-    degree::Int) where {N, T}
-    if !(d.norm == :fully_normalized) 
-        throw(NotImplementedError("unnormalized ICGEM harmonics handling not avialable"))
+function _parse_gravity_harmonics(data::AbstractGravityHarmonicsData{N, T}, 
+    degree::Int, order::Int) where {N, T}
+    if data.normalized
+        Clm_ = convert(Matrix{T}, @views(data.Clm[1:degree+1, 1:order+1]))
+        Slm_ = convert(Matrix{T}, @views(data.Slm[1:degree+1, 1:order+1]))
+        return GravityHarmonics(degree, order, data.μ, data.radius, Clm_, Slm_)
+    else
+        throw(NotImplementedError("handling unnormalized coefficients currently not supported"))
     end
-    return _parse_normalized_harmonics(d, degree)
 end
 
-function parse_model(::Type{T}, ::Type{GravityHarmonics}, d::GravityHarmonicsPDSData{N, T}, 
-    degree::Int) where {N, T}
-    if !d.normalized  
-        throw(NotImplementedError("unnormalized PSD harmonics handling not avialable"))
-    end
-    return _parse_normalized_harmonics(d, degree)
+function parse_model(::Type{T}, ::Type{GravityHarmonics}, d::AbstractGravityHarmonicsData{N, T}, 
+    degree::Int, order::Int=degree) where {T, N}
+    return _parse_gravity_harmonics(d, degree, order)
 end

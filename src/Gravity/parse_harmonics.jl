@@ -117,7 +117,7 @@ Data container for ICGEM spherical harmonics gfc data.
 ### References 
 - http://icgem.gfz-potsdam.de/ICGEM-Format-2011.pdf
 """
-struct GravityHarmonicsICGEMData{N, T}
+struct GravityHarmonicsICGEMData{N, T} <: AbstractGravityHarmonicsData{N, T}
     μ::T # km³/s²
     radius::T # km
     max_degree::Int
