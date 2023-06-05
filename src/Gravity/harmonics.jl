@@ -55,10 +55,10 @@ subtype and a desired expansion `degree` and `order`.
 """
 function parse_model(::Type{T}, ::Type{GravityHarmonics}, d::AbstractGravityHarmonicsData{N, T}, 
     degree::Int, order::Int=degree, args...) where {T, N}
-    if data.normalized
-        Clm_ = convert(Matrix{T}, @views(data.Clm[1:degree+1, 1:order+1]))
-        Slm_ = convert(Matrix{T}, @views(data.Slm[1:degree+1, 1:order+1]))
-        return GravityHarmonics(degree, order, data.μ, data.radius, Clm_, Slm_)
+    if d.normalized
+        Clm_ = convert(Matrix{T}, @views(d.Clm[1:degree+1, 1:order+1]))
+        Slm_ = convert(Matrix{T}, @views(d.Slm[1:degree+1, 1:order+1]))
+        return GravityHarmonics(degree, order, d.μ, d.radius, Clm_, Slm_)
     else
         throw(NotImplementedError("handling unnormalized coefficients currently not supported"))
     end
