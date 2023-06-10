@@ -63,3 +63,14 @@ function parse_model(::Type{T}, ::Type{GravityHarmonics}, d::AbstractGravityHarm
         throw(NotImplementedError("handling unnormalized coefficients currently not supported"))
     end
 end
+
+function dump_model(model::GravityHarmonics, node::XMLNode)
+
+end
+
+function load_model(::Type{T}, ::Type{GravityHarmonics}, node::XMLNode)
+
+end
+
+# Once parsed, the models can be dumped and loaded from memory in a much more efficient way
+# there will be a specific API for this! TODO: think about this!
