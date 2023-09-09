@@ -11,8 +11,13 @@ using StaticArrays
 include("abstract.jl")
 
 # Gravity harmonics
-include("parse_harmonics.jl")
-include("harmonics.jl")
-include("compute_harmonics.jl")
+include("harmonics/utils.jl")
+include("harmonics/parse.jl")
+include("harmonics/harmonics.jl")
+include("harmonics/compute.jl")
 
 # end
+
+long = -120.0 
+lat = -30.0
+point = SA[ cosd(lat)*cosd(long), cosd(lat)*sind(long), sind(lat) ] * m.radius

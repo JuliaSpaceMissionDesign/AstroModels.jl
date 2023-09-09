@@ -20,10 +20,15 @@ struct GravityHarmonics{T} <: AbstractGravityModel
     Slm::Matrix{T}
 
     # Cache
-    cosl::Vector{T}
-    sinl::Vector{T}
-    Plm::Matrix{T}
+    Vlm::Matrix{T}
+    Wlm::Matrix{T}
+
+    η0::Vector{T}
+    η1::Matrix{T}
+    η2::Matrix{T}
 end
+
+include("utils.jl")
 
 function Base.show(io::IO, g::GravityHarmonics{T}) where {T}
     println(io, "GravityHarmonics{$T}(degree=$(g.degree), order=$(g.order))")
@@ -39,11 +44,22 @@ function GravityHarmonics(degree::Int, order::Int, μ::T, radius::T,
     if size(Clm) != (degree+1, order+1)
         throw(ErrorException("GravityHarmonics coefficients are not of dimension ($(degree+1), $(order+1))."))
     end
+    Vlm = zeros(T, degree+2, order+2)
+    Wlm = zeros(T, degree+2, order+2)
+    η0 = zeros(T, degree+1)
+    η1 = zeros(T, degree+2, order+1)
+    η2 = zeros(T, degree+2, order+1)
 
-    cosl = zeros(T, degree+1)
-    sinl = zeros(T, degree+1)
-    Plm = zeros(T, degree+1, order+1)
-    return GravityHarmonics{T}(degree, order, μ, radius, Clm, Slm, cosl, sinl, Plm)
+    for n = 1:degree+1
+        η0[n] = compute_η0(n)
+    end
+    for m = 0:order+1 
+        for n = (m+1):degree+1
+            η1[n+1, m+1] = compute_η1(n, m) 
+            η2[n+1, m+1] = compute_η2(n, m) 
+        end
+    end
+    return GravityHarmonics{T}(degree, order, μ, radius, Clm, Slm, Vlm, Wlm, η0, η1, η2)
 end
 
 """
@@ -63,14 +79,3 @@ function parse_model(::Type{T}, ::Type{GravityHarmonics}, d::AbstractGravityHarm
         throw(NotImplementedError("handling unnormalized coefficients currently not supported"))
     end
 end
-
-function dump_model(model::GravityHarmonics, node::XMLNode)
-
-end
-
-function load_model(::Type{T}, ::Type{GravityHarmonics}, node::XMLNode)
-
-end
-
-# Once parsed, the models can be dumped and loaded from memory in a much more efficient way
-# there will be a specific API for this! TODO: think about this!

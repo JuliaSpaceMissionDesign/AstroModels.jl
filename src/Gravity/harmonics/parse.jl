@@ -1,4 +1,4 @@
-export GravityHarmonicsICGEMData, GravityHarmonicsPDSData
+export GravityHarmonicsICGEMData, GravityHarmonicsPDSData, parse_data
 
 # ----------------------------------
 # PDS gravity harmonics data (SHA)
@@ -300,7 +300,7 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::Abst
         end
     end
 
-    return GravityHarmonicsICGEMData{maxdegree+1, T}(
+    return GravityHarmonicsICGEMData{maxdegree, T}(
         DATA[:gravity_constant]/1e9, # to km^3/s^2
         DATA[:radius]/1e3, # to km 
         maxdegree, 
