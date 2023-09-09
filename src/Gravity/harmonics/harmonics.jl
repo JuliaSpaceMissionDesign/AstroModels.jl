@@ -28,8 +28,6 @@ struct GravityHarmonics{T} <: AbstractGravityModel
     η2::Matrix{T}
 end
 
-include("utils.jl")
-
 function Base.show(io::IO, g::GravityHarmonics{T}) where {T}
     println(io, "GravityHarmonics{$T}(degree=$(g.degree), order=$(g.order))")
 end

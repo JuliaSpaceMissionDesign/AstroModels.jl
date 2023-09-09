@@ -1,5 +1,4 @@
-
-function facdiv(n::Int64, m::Int64)
+function facdiv(n::Int, m::Int)
     res = 1
     tmp = n
     while tmp > m
