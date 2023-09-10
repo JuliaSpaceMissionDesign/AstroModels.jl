@@ -1,3 +1,5 @@
+export compute_acceleration, compute_potential
+
 @fastmath function precompute!(mod::GravityHarmonics{T}, pos::AbstractVector{T}) where T
 
     # Compute sub-expressions

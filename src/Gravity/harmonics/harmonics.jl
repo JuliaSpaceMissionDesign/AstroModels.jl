@@ -1,4 +1,4 @@
-export GravityHarmonics
+export GravityHarmonics, parse_model
 
 """
     GravityHarmonics{T} <: AbstractGravityModel

@@ -1,0 +1,6 @@
+[XGM2016]
+git-tree-sha1 = "08d3017c167477b4c13de8239cbe7ecee07a60c9"
+
+    [[XGM2016.download]]
+    sha256 = "00c9117447d18f365e4b8030e9312ca73eed0d07d11534e06fd95b900f49418c"
+    url = "https://gist.github.com/andreapasquale94/8692fcaa1e61afd600d29d53b55b4d78/raw/08d3017c167477b4c13de8239cbe7ecee07a60c9.tar.gz"
