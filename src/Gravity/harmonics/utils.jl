@@ -31,3 +31,18 @@ end
 @inline compute_η0(m) = (2m-1) * normalization_factors( m, m, m - 1, m - 1 )
 @inline compute_η1(n, m) = (2*n-1)/(n-m) * normalization_factors( n, m, n - 1, m )
 @inline compute_η2(n, m) = (n+m-1)/(n-m) * normalization_factors( n, m, n - 2, m )
+
+@inline function compute_η0_grad(n, m) 
+    if m == 0
+        return normalization_factors( n, 0, n+1, 1 )
+    end
+    return 0.5 * normalization_factors( n, m, n+1, m+1 )
+end
+
+@inline function compute_η1_grad(n, m)
+    return 0.5 * (n-m+2) * (n-m+1) * normalization_factors( n, m, n+1, m-1 )
+end
+
+@inline function compute_η2_grad(n, m)
+    return (n-m+1) * normalization_factors( n, m, n+1, m)
+end
