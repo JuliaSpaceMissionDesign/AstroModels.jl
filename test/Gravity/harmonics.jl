@@ -35,6 +35,6 @@ end
         ϕi = deg2rad(raw[i, 2])
         value = norm(test_acceleration(XGM2016_MODEL, XGM2016_MODEL.radius, λi, ϕi))
         
-        @test isapprox(value, raw[i, end]/1e8, rtol=1e-4, atol=1e-6)
+        @test isapprox(value, raw[i, end]/1e8, rtol=1e-12, atol=1e-5)
     end
 end
