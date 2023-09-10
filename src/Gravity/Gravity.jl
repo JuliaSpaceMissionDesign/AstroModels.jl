@@ -16,4 +16,7 @@ include("harmonics/parse.jl")
 include("harmonics/harmonics.jl")
 include("harmonics/compute.jl")
 
+include("thirdbody.jl")
+include("twobody.jl")
+
 end
