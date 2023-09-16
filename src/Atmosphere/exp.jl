@@ -1,8 +1,9 @@
+export ExponentialAtmosphereData, ExponentialAtmosphere, compute_acceleration
 
 """
-    ExponentialAtmosphere{T}
+    ExponentialAtmosphereData{T}
 
-A struct representing an exponential atmosphere model.
+A struct representing an exponential atmosphere model data.
 
 This struct encapsulates the parameters defining an exponential atmosphere, which
 models the variation of altitude, density, and scale height as a function of
@@ -21,7 +22,11 @@ struct ExponentialAtmosphereData{T} <: AbstractAtmosphereModelData{T}
     ω::T
 end
 
+"""
+    ExponentialAtmosphere{T}
 
+A struct representing an exponential atmosphere model.
+"""
 struct ExponentialAtmosphere{T} <: AbstractAtmosphereModel{T}
     data::ExponentialAtmosphereData{T}
 end

@@ -1,4 +1,7 @@
+export FlatplateSrp, FlatplateSrpData, compute_acceleration
+
 """
+
     FlatplateProperties{T}
 
 A struct representing properties of a flat plate for SRP modeling.
@@ -22,6 +25,7 @@ struct FlatplateProperties{T}
 end
 
 """
+
     FlatplateSrpData{T}
 
 A mutable struct representing data for the flat-plate solar radiation pressure model.
@@ -47,6 +51,7 @@ end
 end
 
 """
+
     FlatplateSrp{T}
 
 A struct representing the flat-plate solar radiation pressure model.
@@ -69,6 +74,7 @@ struct FlatplateSrp{T} <: AbstractSolarPressureModelData{T}
 end
 
 """
+
     @inline @inbounds getplate(m::FlatplateSrp{T}, i::Int) where T
 
 Get the properties of a specific flat plate in the flat-plate SRP model.
@@ -79,6 +85,7 @@ model `m`. Returns the `FlatplateProperties` object representing the specified f
 @inline getplate(m::FlatplateSrp{T}, i::Int) where T =  @inbounds begin m.data.plates[i] end
 
 """
+
     @inline getmass(m::FlatplateSrp{T}) where T
 
 Get the spacecraft mass from the flat-plate SRP model.
@@ -86,6 +93,7 @@ Get the spacecraft mass from the flat-plate SRP model.
 @inline getmass(m::FlatplateSrp{T}) where T = m.data.Msc
 
 """
+
     @inline update!(m::FlatplateSrp{T}, Msc::T) where T
 
 Update the spacecraft mass parameter in a flat-plate SRP model.
@@ -93,6 +101,7 @@ Update the spacecraft mass parameter in a flat-plate SRP model.
 @inline update!(m::FlatplateSrp{T}, Msc::T) where T = update!(m.data, Msc)
 
 """
+
     compute_srp_flatplate(ρsi::T, ρdi::T, Ai::T, Msc::T, P::T, uni::AbstractVector{T}, 
         us::AbstractVector{T}) where T 
 
@@ -138,6 +147,7 @@ the Sun, `us` the **Sun-to-Spacecraft** unit vector and `uni` the plate normal.
 end
 
 """
+
     compute_acceleration(m::FlatplateSrp{T}, s::AbstractVector{T}) where T 
 
 Compute SRP acceleration with the flat-plate model in the spacecraft frame.
@@ -163,6 +173,7 @@ See [`FlatplateSrp`](@ref), [`FlatplateSrpData`](@ref), [`FlatplateProperties`](
 end
 
 """
+
     compute_acceleration(m::FlatplateSrp{T}, s::AbstractVector{T}, 
         ::AbstractSunPressureModel=INV_SQUARE_SRP) where T 
 

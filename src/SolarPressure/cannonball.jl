@@ -1,5 +1,8 @@
+export CannonballSrpData, CannonballSrp, compute_acceleration
+
 """
-  CannonballSrpData{T}
+
+    CannonballSrpData{T}
 
 A mutable struct representing data for the Cannonball solar radiation pressure model.
 
@@ -30,7 +33,8 @@ Update the mass parameter in Cannonball SRP data.
 end
 
 """
-  CannonballSrp{T} 
+
+    CannonballSrp{T} 
 
 A struct representing the Cannonball solar radiation pressure model.
 
@@ -77,6 +81,7 @@ mass, `P` the solar pressure and `s` the Sun-to-spacecraft position vector.
 end
 
 """
+
     compute_acceleration(m::CannonballSrp{T}, s::AbstractVector{T}, P::T) where T 
 
 Compute the acceleration due to SRP using the Cannonball model with a specified solar 
@@ -91,6 +96,7 @@ model `m`, Sun-to-spacecraft position vector `s`, and the solar pressure `P`.
 end
 
 """
+
     compute_acceleration(m::CannonballSrp{T}, s::AbstractVector{T}, 
       ::AbstractSunPressureModel=INV_SQUARE_SRP) where T 
 

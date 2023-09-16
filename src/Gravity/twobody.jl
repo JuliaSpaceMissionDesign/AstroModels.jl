@@ -1,3 +1,5 @@
+export compute_twobody
+
 """
     compute_twobody(μ::T, pos::AbstractVector{T}) where T  
 

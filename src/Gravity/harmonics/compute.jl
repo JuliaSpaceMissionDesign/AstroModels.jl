@@ -1,5 +1,14 @@
 export compute_acceleration, compute_potential
 
+"""
+    precompute!(mod::GravityHarmonics{T}, pos::AbstractVector{T}) where T
+
+Precompute gravitational harmonics coefficients for gravity field calculations.
+
+This function precomputes and updates the gravitational harmonics coefficients needed for
+gravity field calculations based on the spacecraft's position `pos`. It computes
+intermediate values used in subsequent gravity potential and acceleration calculations.
+"""
 @fastmath function precompute!(mod::GravityHarmonics{T}, pos::AbstractVector{T}) where T
 
     # Compute sub-expressions
@@ -35,6 +44,15 @@ export compute_acceleration, compute_potential
     nothing
 end
 
+"""
+    compute_potential(model::GravityHarmonics{T}, pos::AbstractVector{T}) where T
+
+Compute the gravitational potential based on the gravity harmonics model.
+
+This function calculates the gravitational potential at the spacecraft's position `pos`
+using the gravity harmonics model specified by `model`. It relies on
+precomputed coefficients using [`precompute!`](@ref).
+"""
 function compute_potential(model::GravityHarmonics{T}, pos::AbstractVector{T}) where T
     precompute!(model, pos)
     tmp = 0.0 # Initialize the result
@@ -49,6 +67,15 @@ function compute_potential(model::GravityHarmonics{T}, pos::AbstractVector{T}) w
     return model.μ/model.radius * tmp
 end
 
+"""
+    compute_acceleration(mod::GravityHarmonics{T}, pos::AbstractVector{T}) where T
+
+Compute the gravitational acceleration based on the gravity harmonics model.
+
+This function calculates the gravitational acceleration experienced by a spacecraft at
+position `pos` using the gravity harmonics model specified by `mod`. It relies on
+precomputed coefficients using [`precompute!`](@ref).
+"""
 function compute_acceleration(mod::GravityHarmonics{T}, pos::AbstractVector{T}) where T 
 
     precompute!(mod, pos)

@@ -1,3 +1,4 @@
+export compute_thirdbody, compute_thirdbody_hp
 
 """
     compute_thirdbody(μ::T, r::AbstractVector{T}, d::AbstractVector{T}) where T 
