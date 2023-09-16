@@ -15,7 +15,7 @@ const INV_SQUARE_SRP = InvSquareSunPressure()
 
 Compute solar pressure for a given distance `S` from the Sun. Distance in kilometers.
 """
-@inline function compute_solar_pressure(S::Number)
-    tmp = AU / S # Calculate the distance ratio (AU divided by distance from the Sun)
+@inline function compute_solar_pressure(S::Number, R0::Number=AU)
+    tmp = R0 / S # Calculate the distance ratio (AU divided by distance from the Sun)
     return SPR0 * tmp^2 
 end

@@ -76,7 +76,7 @@ Get the properties of a specific flat plate in the flat-plate SRP model.
 This function retrieves the properties of a flat plate at index `i` from the `FlatplateSrp`
 model `m`. Returns the `FlatplateProperties` object representing the specified flat plate.
 """
-@inline @inbounds getplate(m::FlatplateSrp{T}, i::Int) where T =  m.data.plates[i]
+@inline getplate(m::FlatplateSrp{T}, i::Int) where T =  @inbounds begin m.data.plates[i] end
 
 """
     @inline getmass(m::FlatplateSrp{T}) where T
@@ -111,7 +111,7 @@ take into account possible auto occultation between the different plates.
 
 Here `ρsi` and `ρdi` are respectively the rates specular and diffusive reflection, `Ai` the 
 plate surface, `Msc` the spacecraft mass, `P` the solar pressure at the current distance from 
-the Sun, `us` the spacecraft-to-Sun unit vector and `uni` the plate normal.
+the Sun, `us` the **Sun-to-Spacecraft** unit vector and `uni` the plate normal.
 
 ### References
 
@@ -124,7 +124,7 @@ the Sun, `us` the spacecraft-to-Sun unit vector and `uni` the plate normal.
     # Compute unit vectors and illumination
     cosθ = us[1]*uni[1] + us[2]*uni[2] + us[3]*uni[3]
 
-    if cosθ > 0 
+    if cosθ < 0 
         # Compute acceleration components along sun and normal direction
         as = (1-ρsi) * us 
         an = 2*(ρsi*cosθ + ρdi/3) * uni
@@ -138,18 +138,21 @@ the Sun, `us` the spacecraft-to-Sun unit vector and `uni` the plate normal.
 end
 
 """
-    compute_acceleration(m::FlatplateSrp{T}, s::AbstractVector{T}, P::T) where T 
+    compute_acceleration(m::FlatplateSrp{T}, s::AbstractVector{T}) where T 
 
-Compute the acceleration due to SRP using the flat-plate model with a specified solar 
-pressure.
+Compute SRP acceleration with the flat-plate model in the spacecraft frame.
 
-This function calculates the acceleration experienced by a spacecraft in the presence of
-solar radiation pressure (SRP) using the flat-plate model. It takes a `FlatplateSrp`
-model `m`, Sun-to-spacecraft position vector `s`, and the solar pressure `P`.
+The N-plate model is an intermediate approximation that accounts for the variations of the SRP
+acceleration due to changes on the spacecraft attitude, providing a accurate approximation
+of the acceleration. Here the acceleration is computed in the spacecraft frame, e.g. a body
+fixed-frame associated to the spacecraft's center of mass.
+Here `s` is the sun vector (Spacecraft-to-Sun) in the a the spacecraft body-fixed frame.
+
+See [`FlatplateSrp`](@ref), [`FlatplateSrpData`](@ref), [`FlatplateProperties`](@ref).
 """
 @fastmath function compute_acceleration(m::FlatplateSrp{T}, s::AbstractVector{T}, P::T) where T
     # Sun direction
-    us = unitvec(s)
+    us = -unitvec(s)
     # Initialize results
     atot = SVector{3, T}(0., 0., 0.)
     for i in eachindex(m.data.plates) # Sum up the contribution of every plate
@@ -163,12 +166,14 @@ end
     compute_acceleration(m::FlatplateSrp{T}, s::AbstractVector{T}, 
         ::AbstractSunPressureModel=INV_SQUARE_SRP) where T 
 
-Compute the acceleration due to SRP using the flat-plate model with internal solar 
-pressure calculation.
+Compute SRP acceleration with the flat-plate model in the spacecraft frame with internal 
+solar pressure computation.
 
 This function calculates the acceleration experienced by a spacecraft in the presence of
 solar radiation pressure (SRP) using the flat-plate model. It takes a `FlatplateSrp`
-model `m`, Sun-to-spacecraft position vector `s`, and an optional solar pressure model.
+model `m`,  the sun vector (Spacecraft-to-Sun) in the a the spacecraft body-fixed frame`s`, 
+and an optional solar pressure model.
+
 If no solar pressure model is specified, it uses the inverse-square law (`INV_SQUARE_SRP`)
 for solar pressure.
 """
@@ -177,8 +182,8 @@ for solar pressure.
     # Compute sun pressure
     snorm = sqrt(s[1]*s[1] + s[2]*s[2] + s[3]*s[3])
     P = compute_solar_pressure(snorm)
-    # Sun direction
-    us = unitvec(s)
+    # Sun direction 
+    us = -unitvec(s)
     # Initialize results
     atot = SVector{3, T}(0., 0., 0.)
     for i in eachindex(m.data.plates) # Sum up the contribution of every plate
