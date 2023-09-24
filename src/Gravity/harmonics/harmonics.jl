@@ -7,7 +7,7 @@ Type to handle the gravity harmonics models within the JSMD context. User define
 and `order` can be supplied using the [`parse_model`](@ref) constructor associated with 
 the `GravityHarmonics` type.
 """
-struct GravityHarmonics{T} <: AbstractGravityModel
+struct GravityHarmonics{T} <: AbstractGravityModel{T}
     degree::Int
     order::Int 
 
