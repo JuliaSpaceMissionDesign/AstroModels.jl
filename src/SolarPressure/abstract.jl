@@ -1,3 +1,3 @@
-abstract type AbstractSolarPressureModelData{T} <: AbstractJSMDModelData end
+abstract type AbstractSolarPressureModelData{T} <: AbstractAccelerationModelData end
 
-abstract type AbstractSolarPressureModel{T} <: AbstractJSMDModel end
+abstract type AbstractSolarPressureModel{T} <: AbstractAccelerationModel end

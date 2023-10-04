@@ -1,3 +1,3 @@
-abstract type AbstractAtmosphereModelData{T} <: AbstractJSMDModelData end
+abstract type AbstractAtmosphereModelData{T} <: AbstractAccelerationModelData end
 
-abstract type AbstractAtmosphereModel{T} <: AbstractJSMDModel end
+abstract type AbstractAtmosphereModel{T} <: AbstractAccelerationModel end

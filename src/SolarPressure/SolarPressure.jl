@@ -2,7 +2,8 @@ module SolarPressure
 
 using StaticArrays
 
-using JSMDInterfaces.Models: AbstractJSMDModelData, AbstractJSMDModel
+using JSMDInterfaces.Models: AbstractJSMDModel
+using AstrodynamicModels: AbstractAccelerationModel, AbstractAccelerationModelData
 import JSMDInterfaces.Models: parse_data, parse_model
 using JSMDUtils.Math: unitvec
 

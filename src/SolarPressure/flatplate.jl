@@ -12,7 +12,7 @@ pressure (SRP). It includes the following data:
 - `ρs`: The rate of specular reflection for the plate.
 - `ρd`: The rate of diffusive reflection for the plate.
 - `area`: The surface area of the plate.
-- `n`: The unit vector normal to the plate's surface.
+- `n`: The unit vector normal to the plate's surface (one for each thread).
 
 These properties are used to compute SRP effects on a spacecraft using the flat-plate
 model.
@@ -21,7 +21,7 @@ struct FlatplateProperties{T}
     ρs::T
     ρd::T 
     area::T
-    n::Vector{T}
+    n::Vector{Vector{T}}
 end
 
 """
@@ -40,13 +40,14 @@ pressure (SRP) using the flat-plate model. It includes:
 This data is used to compute SRP effects on a spacecraft using the flat-plate SRP
 model.
 """
-mutable struct FlatplateSrpData{T} <: AbstractSolarPressureModelData{T}
+struct FlatplateSrpData{T} <: AbstractSolarPressureModelData{T}
     plates::Vector{FlatplateProperties{T}}
-    Msc::T 
+    Msc::Vector{T} 
 end
 
 @inline function update!(d::FlatplateSrpData{<:Number}, Msc::Number)
-    setfield!(d, :Msc, Msc)
+    tid = Threads.threadid()
+    d.Msc[tid] = Msc
     nothing
 end
 
@@ -90,7 +91,7 @@ model `m`. Returns the `FlatplateProperties` object representing the specified f
 
 Get the spacecraft mass from the flat-plate SRP model.
 """
-@inline getmass(m::FlatplateSrp{T}) where T = m.data.Msc
+@inline getmass(m::FlatplateSrp{T}) where T = m.data.Msc[Threads.threadid()]
 
 """
 
@@ -165,9 +166,11 @@ See [`FlatplateSrp`](@ref), [`FlatplateSrpData`](@ref), [`FlatplateProperties`](
     us = -unitvec(s)
     # Initialize results
     atot = SVector{3, T}(0., 0., 0.)
+    # Get current thread 
+    tid = Threads.threadid()
     for i in eachindex(m.data.plates) # Sum up the contribution of every plate
         plate = getplate(m, i) 
-        atot += compute_srp_flatplate(plate.ρs, plate.ρd, plate.area, m.data.Msc, P, plate.n, us)
+        atot += compute_srp_flatplate(plate.ρs, plate.ρd, plate.area, m.data.Msc[tid], P, plate.n[tid], us)
     end
     return atot
 end
@@ -197,9 +200,11 @@ for solar pressure.
     us = -unitvec(s)
     # Initialize results
     atot = SVector{3, T}(0., 0., 0.)
+    # Get current thread 
+    tid = Threads.threadid()
     for i in eachindex(m.data.plates) # Sum up the contribution of every plate
         plate = getplate(m, i) 
-        atot += compute_srp_flatplate(plate.ρs, plate.ρd, plate.area, m.data.Msc, P, plate.n, us)
+        atot += compute_srp_flatplate(plate.ρs, plate.ρd, plate.area, m.data.Msc[tid], P, plate.n[tid], us)
     end
     return atot
 end

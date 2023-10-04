@@ -1,6 +1,6 @@
 module Gravity 
 
-using JSMDInterfaces.Models: AbstractJSMDModelData, AbstractJSMDModel
+using AstrodynamicModels: AbstractAccelerationModel, AbstractAccelerationModelData
 import JSMDInterfaces.Models: parse_data, parse_model
 using JSMDInterfaces.Errors
 using Logging

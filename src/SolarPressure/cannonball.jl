@@ -4,7 +4,7 @@ export CannonballSrpData, CannonballSrp, compute_acceleration
 
     CannonballSrpData{T}
 
-A mutable struct representing data for the Cannonball solar radiation pressure model.
+A struct representing data for the Cannonball solar radiation pressure model.
 
 This struct holds the parameters needed for modeling solar radiation pressure (SRP) 
 using the Cannonball model. It includes the following data:
@@ -12,23 +12,24 @@ using the Cannonball model. It includes the following data:
 - `Cr`: The reflectivity coefficient, typically equal to `1 + ρ`, where ρ is the
   spacecraft reflectivity.
 - `Asc`: The spacecraft's equivalent area.
-- `Msc`: The spacecraft's mass.
+- `Msc`: The spacecraft's mass (one for each thread used in the simulation).
 
 This data is used to compute SRP effects on a spacecraft using the Cannonball model.
 """
-mutable struct CannonballSrpData{T} <: AbstractSolarPressureModelData{T}
+struct CannonballSrpData{T} <: AbstractSolarPressureModelData{T}
   Cr::T
   Asc::T 
-  Msc::T 
+  Msc::Vector{T} 
 end
 
 """
-    @inline function update!(d::CannonballSrpData{<:Number}, Msc::Number)
+    @inline function update!(d::CannonballSrpData{<:Number}, Msc::Number, tid::Int)
 
-Update the mass parameter in Cannonball SRP data.
+Update the mass parameter in Cannonball SRP data in the current thread `tid`.
 """
 @inline function update!(d::CannonballSrpData{<:Number}, Msc::Number)
-  setfield!(d, :Msc, Msc)
+  tid = Threads.threadid()
+  d.Msc[tid] = Msc
   nothing
 end
 
@@ -54,8 +55,10 @@ end
 
 Update the mass parameter in a Cannonball SRP model.
 """
-@inline update!(m::CannonballSrp{<:Number}, Msc::Number) = update!(m.data, Msc)
-
+@inline function update!(m::CannonballSrp{<:Number}, Msc::Number) 
+  update!(m.data, Msc)
+  nothing
+end
 """
     compute_srp_cannonball(ρ::T, Asc::T, Msc::T, s::AbstractVector{T}) where T 
 
@@ -92,7 +95,8 @@ solar radiation pressure (SRP) using the Cannonball model. It takes a `Cannonbal
 model `m`, Sun-to-spacecraft position vector `s`, and the solar pressure `P`.
 """
 @fastmath function compute_acceleration(m::CannonballSrp{T}, s::AbstractVector{T}, P::T) where T 
-  return compute_srp_cannonball(m.data.rho, m.data.Asc, m.data.Msc, P, s)
+  tid = Threads.threadid()
+  return compute_srp_cannonball(m.data.rho, m.data.Asc, m.data.Msc[tid], P, s)
 end
 
 """

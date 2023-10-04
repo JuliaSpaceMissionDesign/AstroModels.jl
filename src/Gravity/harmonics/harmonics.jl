@@ -20,8 +20,8 @@ struct GravityHarmonics{T} <: AbstractGravityModel{T}
     Slm::Matrix{T}
 
     # Cache
-    Vlm::Matrix{T}
-    Wlm::Matrix{T}
+    Vlm::Array{T, 3}
+    Wlm::Array{T, 3}
 
     η0::Vector{T}
     η1::Matrix{T}
@@ -45,8 +45,10 @@ function GravityHarmonics(degree::Int, order::Int, μ::T, radius::T,
     if size(Clm) != (degree+1, order+1)
         throw(ErrorException("GravityHarmonics coefficients are not of dimension ($(degree+1), $(order+1))."))
     end
-    Vlm = zeros(T, degree+2, order+2)
-    Wlm = zeros(T, degree+2, order+2)
+
+    nth = Threads.nthreads()
+    Vlm = zeros(T, degree+2, order+2, nth)
+    Wlm = zeros(T, degree+2, order+2, nth)
     η0 = zeros(T, degree+1)
     η1 = zeros(T, degree+2, order+1)
     η2 = zeros(T, degree+2, order+1)
