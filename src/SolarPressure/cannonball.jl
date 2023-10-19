@@ -94,7 +94,7 @@ This function calculates the acceleration experienced by a spacecraft in the pre
 solar radiation pressure (SRP) using the Cannonball model. It takes a `CannonballSrp` 
 model `m`, Sun-to-spacecraft position vector `s`, and the solar pressure `P`.
 """
-@fastmath function compute_acceleration(m::CannonballSrp{T}, s::AbstractVector{T}, P::T) where T 
+@fastmath function compute_acceleration(m::CannonballSrp{T}, s::AbstractVector{T}, P::T, args...) where T 
   tid = Threads.threadid()
   return compute_srp_cannonball(m.data.rho, m.data.Asc, m.data.Msc[tid], P, s)
 end
@@ -114,7 +114,7 @@ If no solar pressure model is specified, it uses the inverse-square law (`INV_SQ
 for solar pressure.
 """
 @fastmath function compute_acceleration(m::CannonballSrp{T}, s::AbstractVector{T}, 
-  ::AbstractSunPressureModel=INV_SQUARE_SRP) where T 
+  ::AbstractSunPressureModel=INV_SQUARE_SRP, args...) where T 
   snorm = sqrt(s[1]*s[1] + s[2]*s[2] + s[3]*s[3])
   P = compute_solar_pressure(snorm)
   return compute_acceleration(m, s, P)

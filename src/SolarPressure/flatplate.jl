@@ -161,7 +161,7 @@ Here `s` is the sun vector (Spacecraft-to-Sun) in the a the spacecraft body-fixe
 
 See [`FlatplateSrp`](@ref), [`FlatplateSrpData`](@ref), [`FlatplateProperties`](@ref).
 """
-@fastmath function compute_acceleration(m::FlatplateSrp{T}, s::AbstractVector{T}, P::T) where T
+@fastmath function compute_acceleration(m::FlatplateSrp{T}, s::AbstractVector{T}, P::T, args...) where T
     # Sun direction
     us = -unitvec(s)
     # Initialize results
@@ -192,7 +192,7 @@ If no solar pressure model is specified, it uses the inverse-square law (`INV_SQ
 for solar pressure.
 """
 @fastmath function compute_acceleration(m::FlatplateSrp{T}, s::AbstractVector{T}, 
-    ::AbstractSunPressureModel=INV_SQUARE_SRP) where T
+    ::AbstractSunPressureModel=INV_SQUARE_SRP, args...) where T
     # Compute sun pressure
     snorm = sqrt(s[1]*s[1] + s[2]*s[2] + s[3]*s[3])
     P = compute_solar_pressure(snorm)

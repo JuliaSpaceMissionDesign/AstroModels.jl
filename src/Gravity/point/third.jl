@@ -1,4 +1,25 @@
-export compute_thirdbody, compute_thirdbody_hp
+export compute_acceleration
+
+using FrameTransformations.Frames: vector3, FrameSystem
+
+struct ThirdBodies{T} <: AbstractGravityModel{T}
+    cid::Int
+    axes::Int
+    vid::Vector{Int}
+    μs::Vector{T}
+end
+
+"""
+    parse_model(::Type{T}, ::Type{ThirdBodies}, bodyid::Int, μ::T, radius::T, args...) where {T}
+
+Parse a [`ThirdBodies`](@ref) model representing third body perturbations for the bodies with 
+NAIFIDs `vid` and gravitational parameter `μs` when computing the acceleration from relative 
+to a central body `cid` w.r.t. the `axes` frame.
+"""
+function parse_model(::Type{T}, ::Type{ThirdBodies}, cid::Int, axes::Int, vid::Vector{Int}, μs::Vector{T}, args...) where {T}
+    return ThirdBodies{T}(cid, axes, vid, μs)
+end
+
 
 """
     compute_thirdbody(μ::T, r::AbstractVector{T}, d::AbstractVector{T}) where T 
@@ -54,4 +75,15 @@ position vector from the central body to the perturbing body.
         f*ri[2] + r[2],
         f*ri[3] + r[3]
     )
+end
+
+function compute_acceleration(mod::ThirdBodies{T}, pos::AbstractVector{T}, epoch, 
+    frames::FrameSystem{N, T}, args...) where {N, T} 
+    acc_tot = SVector{3, T}(0., 0., 0.)
+    # Loop over the perturbing bodies
+    for (pid, μi) in zip(mod.vid, mod.μs)
+        Δr = vector3(frames, mod.cid, pid, mod.axes, epoch)
+        acc_tot += compute_thirdbody_hp(μi, pos, Δr)
+    end
+    return acc_tot
 end

@@ -79,7 +79,7 @@ This function calculates the acceleration experienced by an object based on its 
 velocity, and the ballistic coefficient `B` in the exponential atmosphere defined by `model`.
 """
 function compute_acceleration(model::ExponentialAtmosphere{T}, 
-    pv::AbstractVector{T}, B::T) where T 
+    pv::AbstractVector{T}, B::T, args...) where T
 
     r = SA[pv[1], pv[2], pv[3]]
     v = SA[pv[4], pv[5], pv[6]]

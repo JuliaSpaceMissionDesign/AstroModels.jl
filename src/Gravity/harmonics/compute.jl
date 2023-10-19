@@ -78,7 +78,7 @@ This function calculates the gravitational acceleration experienced by a spacecr
 position `pos` using the gravity harmonics model specified by `mod`. It relies on
 precomputed coefficients using [`precompute!`](@ref).
 """
-function compute_acceleration(mod::GravityHarmonics{T}, pos::AbstractVector{T}) where T 
+function compute_acceleration(mod::GravityHarmonics{T}, pos::AbstractVector{T}, args...) where T 
 
     tid = Threads.threadid()
     precompute!(mod, pos, tid)
