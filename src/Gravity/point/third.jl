@@ -29,8 +29,8 @@ Here `r` is the vector from the central body to the particle, and `p` the
 position vector from the central body to the perturbing body.
 """
 @fastmath function compute_thirdbody(μ::T, r::AbstractVector{T}, p::AbstractVector{T}) where T 
-    ri = SA[p[1], p[2], p[2]]
-    Δ = SA[r[1], r[2], r[2]] - ri
+    ri = SA[p[1], p[2], p[3]]
+    Δ = SA[r[1], r[2], r[3]] - ri
     rin = sqrt(ri[1]*ri[1] + ri[2]*ri[2] + ri[3]*ri[3])
     Δn = sqrt(Δ[1]*Δ[1] + Δ[2]*Δ[2] + Δ[3]*Δ[3])
     rin3 = rin*rin*rin
@@ -55,10 +55,10 @@ position vector from the central body to the perturbing body.
 """
 @fastmath function compute_thirdbody_hp(μ::T, r::AbstractVector{T}, p::AbstractVector{T}) where T 
     
-    ri = SA[p[1], p[2], p[2]]
+    ri = SA[p[1], p[2], p[3]]
     ri2 = ri[1]*ri[1] + ri[2]*ri[2] + ri[3]*ri[3]
     
-    Δ = SA[r[1], r[2], r[2]] - ri
+    Δ = SA[r[1], r[2], r[3]] - ri
     Δn2 = Δ[1]*Δ[1] + Δ[2]*Δ[2] + Δ[3]*Δ[3]
     Δn = sqrt(Δn2)
     Δn3 = Δn2 * Δn
