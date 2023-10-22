@@ -42,39 +42,46 @@ position vector from the central body to the perturbing body.
     )
 end
 
+@inline @fastmath function fq(q)
+    # Battin, page 389, eq. 8.60
+    sq = sqrt(1+q)
+    return q*((3 + q*(3 + q))/(1 + (sq*sq*sq)))
+end
+
 """
     compute_thirdbody_hp(μ::T, r::AbstractVector{T}, d::AbstractVector{T}) where T 
 
 Compute acceleration due to the third body perturbation with an high-precision algorithm 
 (no loss of significance results in the computations.)
-Here `r` is the vector from the central body to the particle, and `p` the
+Here `rc` is the vector from the central body to the particle, and `rp` the
 position vector from the central body to the perturbing body.
 
 ### References 
 - Battin, R.H. -- An Introduction to the Mathematics and Methods of Astrodynamics, AIAA, 1999.
 """
-@fastmath function compute_thirdbody_hp(μ::T, r::AbstractVector{T}, p::AbstractVector{T}) where T 
+@fastmath function compute_thirdbody_hp(μ::T, rc::AbstractVector{T}, rp::AbstractVector{T}) where T 
+
+    r = SA[rc[1], rc[2], rc[3]]
+    ρⱼ = SA[rp[1], rp[2], rp[3]]
+    Δⱼ = r - ρⱼ
     
-    ri = SA[p[1], p[2], p[3]]
-    ri2 = ri[1]*ri[1] + ri[2]*ri[2] + ri[3]*ri[3]
-    
-    Δ = SA[r[1], r[2], r[3]] - ri
-    Δn2 = Δ[1]*Δ[1] + Δ[2]*Δ[2] + Δ[3]*Δ[3]
-    Δn = sqrt(Δn2)
-    Δn3 = Δn2 * Δn
-    
-    # Battin, page 389, eq 8.59/8.60
-    Δm = -(Δ + ri)
-    q = (r[1]*Δm[1] + r[2]*Δm[2] + r[3]*Δm[3])/ri2
-    tmp = sqrt(1+q)
-    f = tmp*(1+q) - 1 # f(q)
+    r² = r[1]*r[1] + r[2]*r[2] + r[3]*r[3]
+    ρ² = ρⱼ[1]*ρⱼ[1] + ρⱼ[2]*ρⱼ[2] + ρⱼ[3]*ρⱼ[3]
+    Δ² = Δⱼ[1]*Δⱼ[1] + Δⱼ[2]*Δⱼ[2] + Δⱼ[3]*Δⱼ[3]
+    Δ = sqrt(Δ²)
+    Δ³ = Δ²*Δ
+
+    # Battin, page 389, eq 8.62 
+    δ = r[1]*ρⱼ[1] + r[2]*ρⱼ[2] + r[3]*ρⱼ[3]
+    q = (r² - 2δ)/ρ²
+    f = fq(q)
 
     # Battin, page 389, eq. 8.61
-    return μ/Δn3 * SVector{3, T}(
-        f*ri[1] + r[1], 
-        f*ri[2] + r[2],
-        f*ri[3] + r[3]
-    )
+    return - μ/Δ³ * SA[
+        f*ρⱼ[1] + r[1], 
+        f*ρⱼ[2] + r[2],
+        f*ρⱼ[3] + r[3]
+    ]
 end
 
 function compute_acceleration(mod::ThirdBodies{T}, pos::AbstractVector{T}, epoch, 
