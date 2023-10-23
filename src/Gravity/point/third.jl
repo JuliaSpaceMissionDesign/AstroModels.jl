@@ -35,11 +35,11 @@ position vector from the central body to the perturbing body.
     Δn = sqrt(Δ[1]*Δ[1] + Δ[2]*Δ[2] + Δ[3]*Δ[3])
     rin3 = rin*rin*rin
     Δn3 = Δn*Δn*Δn 
-    return -μ * SVector{3, T}(
+    return -μ * SA[
         ri[1]/rin3 + Δ[1]/Δn3, 
         ri[2]/rin3 + Δ[2]/Δn3, 
         ri[3]/rin3 + Δ[3]/Δn3
-    )
+    ]
 end
 
 @inline @fastmath function fq(q)
