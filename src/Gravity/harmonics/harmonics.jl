@@ -20,8 +20,8 @@ struct GravityHarmonics{T} <: AbstractGravityModel{T}
     Slm::Matrix{T}
 
     # Cache
-    Vlm::Array{T, 3}
-    Wlm::Array{T, 3}
+    Vlm::DiffCache{Array{T, 3}, Vector{T}}
+    Wlm::DiffCache{Array{T, 3}, Vector{T}}
 
     η0::Vector{T}
     η1::Matrix{T}
@@ -71,7 +71,10 @@ function GravityHarmonics(degree::Int, order::Int, μ::T, radius::T,
             η2g[n+1, m+1] = compute_η2_grad(n, m) 
         end
     end
-    return GravityHarmonics{T}(degree, order, μ, radius, Clm, Slm, Vlm, Wlm, η0, η1, η2, η0g, η1g, η2g)
+    return GravityHarmonics{T}(
+        degree, order, μ, radius, Clm, Slm, 
+        DiffCache(Vlm), DiffCache(Wlm), 
+        η0, η1, η2, η0g, η1g, η2g)
 end
 
 """

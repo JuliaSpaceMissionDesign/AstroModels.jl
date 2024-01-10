@@ -1,3 +1,3 @@
-@testset "Spherical harmonics" begin
+@testset "Spherical Harmonics" begin
     include("harmonics.jl")
 end

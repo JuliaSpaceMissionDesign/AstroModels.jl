@@ -23,7 +23,7 @@ end
 Compute acceleration due to the central body. Here `r` is the vector from the central body 
 to the particle.
 """
-@fastmath function compute_twobody(μ::T, pos::AbstractVector{T}) where T 
+@fastmath function compute_twobody(μ::Number, pos::AbstractVector{<:Number}) 
     r = SA[pos[1], pos[2], pos[3]]
     rn2 = r[1]*r[1] + r[2]*r[2] + r[3]*r[3]
     rn = sqrt(rn2)

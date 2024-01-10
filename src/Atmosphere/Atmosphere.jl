@@ -1,6 +1,6 @@
 module Atmosphere 
 
-using AstrodynamicModels: AbstractAccelerationModel, AbstractAccelerationModelData
+using AstroModels: AbstractAccelerationModel, AbstractAccelerationModelData
 import JSMDInterfaces.Models: parse_data, parse_model
 using JSMDInterfaces.Errors
 using StaticArrays

@@ -1,5 +1,6 @@
 using Test
-using AstrodynamicModels 
+using AstroModels 
+using ForwardDiff
 
 using LinearAlgebra
 using StaticArrays
@@ -16,4 +17,4 @@ include("utils.jl");
             end 
         end
     end
-end
+end;

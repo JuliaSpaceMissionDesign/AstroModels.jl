@@ -1,7 +1,5 @@
 export compute_acceleration
 
-using FrameTransformations.Frames: vector3, FrameSystem
-
 struct ThirdBodies{T} <: AbstractGravityModel{T}
     cid::Int
     axes::Int
@@ -85,7 +83,7 @@ position vector from the central body to the perturbing body.
 end
 
 function compute_acceleration(mod::ThirdBodies{T}, pos::AbstractVector{T}, epoch, 
-    frames::FrameSystem{N, T}, args...) where {N, T} 
+    frames::G, args...) where {T, G <:AbstractJSMDFrameGraph}
     acc_tot = SVector{3, T}(0., 0., 0.)
     # Loop over the perturbing bodies
     for (pid, μi) in zip(mod.vid, mod.μs)
