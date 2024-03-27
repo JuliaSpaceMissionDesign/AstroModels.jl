@@ -15,9 +15,8 @@ using AstroModels: AbstractAccelerationModel, AbstractAccelerationModelData
 include("abstract.jl")
 
 # Gravity harmonics
-include("harmonics/utils.jl")
 include("harmonics/parse.jl")
-include("harmonics/harmonics.jl")
+include("harmonics/type.jl")
 include("harmonics/compute.jl")
 
 # Point mass 

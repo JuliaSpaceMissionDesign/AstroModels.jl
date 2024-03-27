@@ -50,10 +50,10 @@ Parse data associated to a `GravityHarmonics` model from NASA's PDS SHA files.
                  Optional, default is -1 indicating that all the coefficients shall be loaded.
 
 ### References
-- https://pds-geosciences.wustl.edu/dataserv/gravity_model_desc.htm
-- https://pds-geosciences.wustl.edu/mro/mro-m-rss-5-sdp-v1/mrors_1xxx/data/shadr/ggmro_095a_sha.lbl
-- https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/gggrx_1200a_sha.lbl
-- https://pds-geosciences.wustl.edu/messenger/mess-h-rss_mla-5-sdp-v1/messrs_1001/data/shadr/jgmess_160a_sha.tab
+- [https://pds-geosciences.wustl.edu/dataserv/gravity_model_desc.htm](https://pds-geosciences.wustl.edu/dataserv/gravity_model_desc.htm)
+- [https://pds-geosciences.wustl.edu/mro/mro-m-rss-5-sdp-v1/mrors_1xxx/data/shadr/ggmro_095a_sha.lbl](https://pds-geosciences.wustl.edu/mro/mro-m-rss-5-sdp-v1/mrors_1xxx/data/shadr/ggmro_095a_sha.lbl)
+- [https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/gggrx_1200a_sha.lbl](https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/gggrx_1200a_sha.lbl)
+- [https://pds-geosciences.wustl.edu/messenger/mess-h-rss_mla-5-sdp-v1/messrs_1001/data/shadr/jgmess_160a_sha.tab](https://pds-geosciences.wustl.edu/messenger/mess-h-rss_mla-5-sdp-v1/messrs_1001/data/shadr/jgmess_160a_sha.tab)
 """
 function parse_data(::Type{T}, ::Type{GravityHarmonicsPDSData}, filename::AbstractString; 
     maxdegree::Int=-1) where T 
@@ -96,9 +96,7 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsPDSData}, filename::Abstra
         end
     end
 
-    return GravityHarmonicsPDSData{maxdegree, T}(
-        μ, radius, maxdegree, normalized, Clm, Slm
-        )
+    return GravityHarmonicsPDSData{maxdegree, T}(μ, radius, maxdegree, normalized, Clm, Slm)
 end
 
 """
@@ -115,7 +113,7 @@ Data container for ICGEM spherical harmonics gfc data.
 - `Clm, Slm` -- spherical harmonics constants
 
 ### References 
-- http://icgem.gfz-potsdam.de/ICGEM-Format-2011.pdf
+- [http://icgem.gfz-potsdam.de/ICGEM-Format-2023.pdf](http://icgem.gfz-potsdam.de/ICGEM-Format-2023.pdf)
 """
 struct GravityHarmonicsICGEMData{N, T} <: AbstractGravityHarmonicsData{N, T}
     μ::T # km³/s²
@@ -148,7 +146,7 @@ Earth Models `gfc` models.
                  Optional, default is -1 indicating that all the coefficients shall be loaded.
 
 ### References
-- http://icgem.gfz-potsdam.de/ICGEM-Format-2023.pdf
+- [http://icgem.gfz-potsdam.de/ICGEM-Format-2023.pdf](http://icgem.gfz-potsdam.de/ICGEM-Format-2023.pdf)
 """
 function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::AbstractString; 
     maxdegree::Int=-1) where T 
@@ -263,7 +261,11 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::Abst
     if maxdegree == -1 
         maxdegree = deg
     elseif maxdegree > deg 
-        throw(ArgumentError("Maximum degree provided ($maxdegree) is greater than the one in the file ($deg)."))
+        throw(
+            ArgumentError(
+                "Maximum degree provided ($maxdegree) is greater than the one in the file ($deg)."
+            )
+        )
     end 
 
     # Check if there is any number to be converted. In this case, we assume that
@@ -276,7 +278,9 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::Abst
                 raw_coefs[i] = parse(T, data)
             catch e
                 throw(
-                    ErrorException("Invalid ICGME format: could not convert the coefficient \"$(raw_coefs[i])\" to a $(T).")
+                    ErrorException(
+                        "Invalid ICGME format: could not convert the coefficient \"$(raw_coefs[i])\" to a $(T)."
+                    )
                 )
             end
         end

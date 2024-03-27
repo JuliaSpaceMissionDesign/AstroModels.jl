@@ -1,12 +1,12 @@
-using AstrodynamicModels
+using AstroModels
 using Documenter
 
 const CI = get(ENV, "CI", "false") == "true"
 
 makedocs(;
-    modules=[AstrodynamicModels],
-    authors="Andrea Pasquale <andrea.pasquale@polimi.it> and Michele Ceresoli <michele.ceresoli@polimi.it>",
-    sitename="AstrodynamicModels.jl",
+    modules=[AstroModels],
+    authors="Andrea Pasquale <andrea.pasquale@polimi.it>",
+    sitename="AstroModels.jl",
     format=Documenter.HTML(; prettyurls=CI, highlights=["yaml"], ansicolor=true),
     pages=[
         "Home" => "index.md", 
@@ -17,7 +17,7 @@ makedocs(;
             "Atmosphere" => "api/Atmosphere.md"
         ]
     ],
-    clean=true
+    clean=true,
 )
 
 # deploydocs(;
