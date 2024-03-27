@@ -7,9 +7,11 @@ using PreallocationTools
 
 using JSMDInterfaces.Errors
 using JSMDInterfaces.Frames: vector3, AbstractJSMDFrameGraph
+using JSMDInterfaces.Interface: @interface
 import JSMDInterfaces.Models: parse_data, parse_model
 
 using AstroModels: AbstractAccelerationModel, AbstractAccelerationModelData
+import AstroModels: compute_acceleration
 
 # Abstract types/methods
 include("abstract.jl")

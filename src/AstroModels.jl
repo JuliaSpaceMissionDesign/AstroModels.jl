@@ -1,6 +1,7 @@
 module AstroModels
 
     using JSMDInterfaces.Models: AbstractJSMDModelData, AbstractJSMDModel
+    using JSMDInterfaces.Interface: @interface
     using PreallocationTools
     
     include("abstract.jl")

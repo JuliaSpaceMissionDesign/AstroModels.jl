@@ -64,8 +64,6 @@ end
 
 end
 
-
-
 @testset "ICGEM based, static model" verbose=true begin 
    
     PATH_ICGEM = artifact"XGM2016" 

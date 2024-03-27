@@ -167,6 +167,15 @@ function GravityHarmonics(C::AbstractMatrix{T}, S::AbstractMatrix{T}, deg::Int, 
     )
 end
 
+@inline @inbounds function terms(gh::GravityHarmonics, x) 
+    tid = Threads.threadid()    
+    V = @view get_tmp(gh.V, x)[:, :, tid]
+    W = @view get_tmp(gh.W, x)[:, :, tid]
+    return V, W
+end
+
+@inline coefficients(gh::GravityHarmonics) = (gh.C, gh.S)
+
 function parse_model(
     ::Type{T}, ::Type{GravityHarmonics}, data::AbstractGravityHarmonicsData{N, T},
     degree::Int, onlyzonal::Bool, args...) where {N, T}

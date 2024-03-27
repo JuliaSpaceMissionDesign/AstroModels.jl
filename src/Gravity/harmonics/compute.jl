@@ -1,16 +1,5 @@
-export compute_potential, compute_acceleration
 
-@inline @inbounds function terms(gh::GravityHarmonics, x) 
-    tid = Threads.threadid()    
-    V = @view get_tmp(gh.V, x)[:, :, tid]
-    W = @view get_tmp(gh.W, x)[:, :, tid]
-    return V, W
-end
-
-@inline coefficients(gh::GravityHarmonics) = (gh.C, gh.S)
-
-
-function precompute_terms!(gh::GravityHarmonics{T}, pos, R) where T
+@inbounds function precompute_terms!(gh::GravityHarmonics{T}, pos, R) where T
 
     V, W = terms(gh, pos)
     
@@ -68,7 +57,7 @@ function compute_potential(gh::GravityHarmonics{T}, pos, μ, radius; recompute=t
 
     # Compute potential 
     u = 0
-    for n in gh.degree+1:-1:1
+    @inbounds for n in gh.degree+1:-1:1
         if !onlyzonal
             for m in n:-1:2 # m ≠ 0 
                 u += V[n, m] * C[n, m] + W[n, m] * S[n, m]
@@ -76,6 +65,7 @@ function compute_potential(gh::GravityHarmonics{T}, pos, μ, radius; recompute=t
         end
         u += V[n, 1] * C[n, 1] # m = 0
     end
+    
     return μ/radius * u
 end
 
