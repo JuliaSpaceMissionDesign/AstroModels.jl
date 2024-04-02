@@ -1,51 +1,19 @@
-## [Gravity](@id astro_gravity_api) 
+# [Gravity](@id astro_gravity_api) 
+
+### Public
 
 ```@autodocs
 Modules = [AstroModels.Gravity]
 Private = false
-Order = [:function]
-```
-
-### Types
-
-```@autodocs
-Modules = [AstroModels.Gravity]
-Private = false
-Order = [:type]
+Order = [:type, :function]
 ```
 
 -------------------------------------------------------------
 
 ### Internals
 
-#### Functions
-
 ```@autodocs
 Modules = [AstroModels.Gravity]
 Public = false
-Order = [:function]
-```
-
-#### Types
-
-```@autodocs
-Modules = [AstroModels.Gravity]
-Public = false
-Order = [:type]
-```
-
-#### Macros
-
-```@autodocs
-Modules = [AstroModels.Gravity]
-Public = false
-Order = [:macro]
-```
-
-#### Constants
-
-```@autodocs
-Modules = [AstroModels.Gravity]
-Public = false
-Order = [:constant]
+Order = [:function, :type, :macro, :constant]
 ```
