@@ -1,4 +1,5 @@
-export AbstractAccelerationModel, AbstractAccelerationModelData, compute_acceleration
+export AbstractAccelerationModel, AbstractAccelerationModelData, 
+       compute_acceleration, compute_∂acceleration
 
 abstract type ForceModelData <: AbstractJSMDModelData end
 
@@ -9,7 +10,7 @@ abstract type AbstractAccelerationModelData <: ForceModelData end
 abstract type AbstractAccelerationModel <: ForceModel end
 
 """
-    compute_acceleration(m::A, args...) where {A <: AccelerationModel}
+    compute_acceleration(m::A, args...) where {A <: AbstractAccelerationModel}
 
 This function serves as an interface for constructing acceleration models.
 
@@ -20,4 +21,19 @@ This function serves as an interface for constructing acceleration models.
 !!! warning 
     Concrete implementations of `AbstractAccelerationModel` must provide this function!
 """
-@interface function compute_acceleration(::A, args...) where {A <: AbstractAccelerationModelData} end
+@interface function compute_acceleration(::A, args...) where {A <: AbstractAccelerationModel} end
+
+"""
+    compute_∂acceleration(m::A, args...) where {A <: AbstractAccelerationModel}
+
+This function serves as an interface for constructing acceleration models gradients. This 
+function returns both the acceleration and its gradient w.r.t. the state vector.
+
+### Arguments
+- `m::A`: An instance of a subtype of `AccelerationModel`, representing the force model 
+    producing the acceleration.
+
+!!! warning 
+    Concrete implementations of `AbstractAccelerationModel` must provide this function!
+"""
+@interface function compute_∂acceleration(::A, args...) where {A <: AbstractAccelerationModel} end
