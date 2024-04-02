@@ -6,7 +6,7 @@
 end
 
 """
-    compute_thirdbody(μ::T, r::AbstractVector{T}, d::AbstractVector{T}) where T 
+    compute_thirdbody(μ::T, rc, rp) where T 
 
 Compute acceleration due to the third body perturbation with an high-precision algorithm 
 (no loss of significance results in the computations.)
@@ -16,7 +16,7 @@ position vector from the central body to the perturbing body.
 ### References 
 - Battin, R.H. -- An Introduction to the Mathematics and Methods of Astrodynamics, AIAA, 1999.
 """
-@fastmath function compute_thirdbody(μ::T, rc::AbstractVector{T}, rp::AbstractVector{T}) where T 
+@fastmath function compute_thirdbody(μ::T, rc, rp) where T 
 
     r = SA[rc[1], rc[2], rc[3]]
     ρⱼ = SA[rp[1], rp[2], rp[3]]
@@ -42,14 +42,14 @@ position vector from the central body to the perturbing body.
 end
 
 """
-    compute_acceleration(center::PointMass{T}, third::PointMass{T}, pos::AbstractVector{T}, 
+    compute_acceleration(center::PointMass{T}, pos::AbstractVector{<:Number}, third::PointMass{T},
         axes, epoch, frames::G, args...) where {T, G <:AbstractJSMDFrameGraph}
 
 Compute accelerations due to third body perturbations given the position vector `pos` relative 
 to the center, the current epoch `epoch` and a frame graph `frames`.
 """
-function compute_acceleration(center::PointMass{T}, third::PointMass{T}, 
-    pos::AbstractVector{T}, axes, epoch, frames::G, args...) where {T, G <:AbstractJSMDFrameGraph}
+function compute_acceleration(center::PointMass{T}, pos::AbstractVector{<:Number}, 
+    third::PointMass{T}, axes, epoch, frames::G, args...) where {T, G <:AbstractJSMDFrameGraph}
     Δr = vector3(frames, center.id, third.id, axes, epoch)
     return compute_thirdbody(third.μ, pos, Δr)
 end

@@ -1,6 +1,16 @@
 export PolyhedronGravity
 
-struct PolyhedronGravity{T}
+"""
+    PolyhedronGravity{T} <: AbstractGravityModel
+
+Type to handle the polyhedron gravity within the JSMD context.
+
+### References 
+- Werner, R. A., & Scheeres, D. J. (1996). Exterior gravitation of a polyhedron derived and 
+  compared with harmonic and mascon gravitation representations of asteroid 4769 Castalia. 
+  Celestial Mechanics and Dynamical Astronomy, 65, 313-344.
+"""
+struct PolyhedronGravity{T} <: AbstractGravityModel{T}
     vertices::Vector{SVector{3, T}}
     faces::Vector{FaceProperties{T}}
     edges::Vector{EdgeProperties{T}}

@@ -36,10 +36,10 @@ to the particle.
 end
 
 """
-    compute_acceleration(mod::PointMass{T}, pos::AbstractVector{T}, args...) where T 
+    compute_acceleration(mod::PointMass{T}, pos::AbstractVector{<:Number}, args...) where T 
 
 Compute acceleration, given the position vector, `pos` of a spacecraft, due to a point mass.
 """
-function compute_acceleration(mod::PointMass{T}, pos::AbstractVector{T}, args...) where T 
+function compute_acceleration(mod::PointMass{T}, pos::AbstractVector{<:Number}, args...) where T 
     return compute_twobody(mod.μ, pos)
 end

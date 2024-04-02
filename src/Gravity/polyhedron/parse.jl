@@ -1,5 +1,40 @@
 export PolyhedronGravityData
 
+"""
+
+    PolyhedronGravityData{T} <: AbstractGravityModelData
+
+A `PolyhedronGravityData` instance represents data for a polyhedron used in gravity modeling. 
+It contains information about vertices, faces, and adjacency relationships between faces.
+
+# Fields
+- `vertices`: Vector of 3D vectors representing vertices.
+- `faces`: Vector of 3-element vectors representing faces topology.
+- `adj`: Dictionary storing the faces adjacent to each unique edge.
+
+--- 
+
+    PolyhedronGravityData{T}(filename::AbstractString)
+
+Create a `PolyhedronGravityData` object from an ``obj`` file.
+This format requires vertices and faces to be in the same file and be organized using a prefix:
+``v`` for vertices and ``f`` for faces. Lines starting with ``#`` are comments and will be ingnored.
+
+---
+
+    PolyhedronGravityData{T}(nodefile::AbstractString, facefile::AbstractString)
+
+Create a `PolyhedronGravityData` object from ``node`` and ``face`` files.
+This format require a separated file for nodes and faces. Each file contains three columns with 
+data. Lines starting with ``#`` are comments and will be ingnored.
+
+---
+
+    PolyhedronGravityData{T}(vertices, faces)
+
+Create a `PolyhedronGravityData` object from vertices and faces.
+
+"""
 struct PolyhedronGravityData{T} <: AbstractGravityModelData
     vertices::Vector{SVector{3, T}}
     faces::Vector{SVector{3, Int}}
@@ -23,7 +58,13 @@ function unique_edges(faces)
     return unique_edges_adjfaces
 end
 
-function read_alias_waveform(::Type{T}, filename::AbstractString) where T
+function _parse_row(::Type{T}, parts, first) where T 
+    return SVector{3, T}(
+        parse(T, parts[first]), parse(T, parts[first+1]), parse(T, parts[first+2])
+    )
+end
+
+function parse_objfile(::Type{T}, filename::AbstractString) where T
     vertices = SVector{3, T}[]
     faces = SVector{3, Int}[]
     open(filename, "r") do file 
@@ -35,16 +76,12 @@ function read_alias_waveform(::Type{T}, filename::AbstractString) where T
             elseif parts[1] == "v" && length(parts) == 4
                 push!(
                     vertices, 
-                    SVector{3, T}(
-                        parse(T, parts[2]), parse(T, parts[3]), parse(T, parts[4])
-                    )
+                    _parse_row(T, parts, 2)
                 )
             elseif parts[1] == "f" && length(parts) == 4
                 push!(
                     faces, 
-                    SVector{3, T}(
-                        parse(Int, parts[2]), parse(Int, parts[3]), parse(Int, parts[4])
-                    )
+                    _parse_row(Int, parts, 2)
                 )
             else 
                 throw( ErrorException("Line '$line' cannot be parsed!") )
@@ -54,10 +91,45 @@ function read_alias_waveform(::Type{T}, filename::AbstractString) where T
     return vertices, faces
 end
 
+function parse_nodefile(::Type{T}, filename::AbstractString) where T 
+    data = SVector{3, T}[]
+    open(filename, "r") do file 
+        for line in eachline(file)
+            parts = split(strip(line))
+            if isempty(parts) || line[1] == '#'
+                @debug "Comment line '$line' skipped"
+                continue
+            elseif length(parts) == 3
+                push!(
+                    data, 
+                    _parse_row(T, parts, 1)
+                )
+            else 
+                throw( ErrorException("Line '$line' cannot be parsed!") )
+            end
+        end
+    end
+end
+
 function PolyhedronGravityData{T}(filename::AbstractString) where T
-    vertices, faces = read_alias_waveform(T, filename)
-    adj = unique_edges(faces)
-    return PolyhedronGravityData{T}(vertices, faces, adj)
+    if !endswith(filename, ".obj")
+        throw(ErrorException("File '$filename' cannot be processed, unknown format."))
+    end
+    vertices, faces = parse_objfile(T, filename)
+    return PolyhedronGravityData{T}(vertices, faces)
+end
+
+function PolyhedronGravityData{T}(nodefile::AbstractString, facefile::AbstractString) where T 
+    if !endswith(nodefile, ".node")
+        throw(ErrorException("File '$nodefile' cannot be processed, unknown format, shall be '.node'."))
+    end
+    if !endswith(facefile, ".face")
+        throw(ErrorException("File '$facefile' cannot be processed, unknown format, shall be '.face'."))
+    end
+
+    vertices = parse_nodefile(T, nodefile)
+    faces = parse_nodefile(Int, facefile)
+    return PolyhedronGravityData{T}(vertices, faces)
 end
 
 function  PolyhedronGravityData{T}(vertices, faces) where T 

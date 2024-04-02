@@ -1,5 +1,5 @@
 
-@inbounds function precompute_terms!(gh::GravityHarmonics{T}, pos, R) where T
+@inbounds function precompute_terms!(gh::GravityHarmonics{T}, pos::AbstractVector{<:Number}, R) where T
 
     V, W = terms(gh, pos)
     
@@ -47,7 +47,9 @@
 
 end
 
-function compute_potential(gh::GravityHarmonics{T}, pos, μ, radius; recompute=true) where T 
+function compute_potential(gh::GravityHarmonics{T}, pos::AbstractVector{<:Number}, μ, radius; 
+    recompute=true) where T 
+    
     recompute && precompute_terms!(gh, pos, radius)
 
     # Get data
@@ -69,8 +71,8 @@ function compute_potential(gh::GravityHarmonics{T}, pos, μ, radius; recompute=t
     return μ/radius * u
 end
 
-function compute_acceleration(gh::GravityHarmonics{T}, pos::AbstractVector{P}, μ, radius, 
-    args...; recompute=true) where {T, P} 
+function compute_acceleration(gh::GravityHarmonics{T}, pos::AbstractVector{<:Number}, μ, radius, 
+    args...; recompute=true) where {T} 
     # Precompute terms on the current thread
     recompute && precompute_terms!(gh, pos, radius)
 
@@ -101,6 +103,6 @@ function compute_acceleration(gh::GravityHarmonics{T}, pos::AbstractVector{P}, �
         end
     end
 
-    return SVector{3, P}( g*ẍ, g*ÿ, g*z̈ )
+    return SVector{3}( g*ẍ, g*ÿ, g*z̈ )
 
 end
