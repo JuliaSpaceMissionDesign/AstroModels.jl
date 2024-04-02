@@ -1,5 +1,12 @@
 export GravityHarmonicsICGEMData, GravityHarmonicsPDSData, parse_data
 
+"""
+    AbstractGravityHarmonicsData{N, T}
+
+Abstract type for all spherical harmonics expansion model data.
+"""
+abstract type AbstractGravityHarmonicsData{N, T} <: AbstractGravityModelData end
+
 # ----------------------------------
 # PDS gravity harmonics data (SHA)
 # ----------------------------------

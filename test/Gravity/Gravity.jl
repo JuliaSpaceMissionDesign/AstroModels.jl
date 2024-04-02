@@ -10,3 +10,7 @@ using AstroModels.Gravity
 @testset "Spherical Harmonics" verbose=true begin
     include("harmonics.jl")
 end;
+
+@testset "Polyhedron" verbose=true begin 
+    include("polyhedron.jl")
+end;

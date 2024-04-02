@@ -13,8 +13,8 @@ makedocs(;
         "API" => 
         [
             "Gravity" => "api/Gravity.md",
-            "SRP" => "api/SRP.md",
-            "Atmosphere" => "api/Atmosphere.md"
+            # "SRP" => "api/SRP.md",
+            # "Atmosphere" => "api/Atmosphere.md"
         ]
     ],
     clean=true,

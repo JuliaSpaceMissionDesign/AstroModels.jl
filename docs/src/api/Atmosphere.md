@@ -1,7 +1,7 @@
 ## [Atmosphere](@id astro_atmos_api) 
 
 ```@autodocs
-Modules = [AstrodynamicModels.Atmosphere]
+Modules = [AstroModels.Atmosphere]
 Private = false
 Order = [:function]
 ```
@@ -9,7 +9,7 @@ Order = [:function]
 ### Types
 
 ```@autodocs
-Modules = [AstrodynamicModels.Atmosphere]
+Modules = [AstroModels.Atmosphere]
 Private = false
 Order = [:type]
 ```
@@ -21,7 +21,7 @@ Order = [:type]
 #### Functions
 
 ```@autodocs
-Modules = [AstrodynamicModels.Atmosphere]
+Modules = [AstroModels.Atmosphere]
 Public = false
 Order = [:function]
 ```
@@ -29,7 +29,7 @@ Order = [:function]
 #### Types
 
 ```@autodocs
-Modules = [AstrodynamicModels.Atmosphere]
+Modules = [AstroModels.Atmosphere]
 Public = false
 Order = [:type]
 ```
@@ -37,7 +37,7 @@ Order = [:type]
 #### Macros
 
 ```@autodocs
-Modules = [AstrodynamicModels.Atmosphere]
+Modules = [AstroModels.Atmosphere]
 Public = false
 Order = [:macro]
 ```
@@ -45,7 +45,7 @@ Order = [:macro]
 #### Constants
 
 ```@autodocs
-Modules = [AstrodynamicModels.Atmosphere]
+Modules = [AstroModels.Atmosphere]
 Public = false
 Order = [:constant]
 ```

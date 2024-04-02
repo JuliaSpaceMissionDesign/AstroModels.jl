@@ -36,7 +36,7 @@ function Base.show(io::IO, g::GravityHarmonics{T}) where {T}
 end
 
 @fastmath function precompute_factors!(N, deg)
-    # N[1,1] = sqrt(2)
+
     N[1, 1] = 1
     @inbounds for n in 1:deg 
         # m = 0

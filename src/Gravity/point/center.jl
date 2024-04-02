@@ -1,19 +1,23 @@
-export PointMass, parse_model, compute_acceleration 
+export PointMass, parse_model 
 
+"""
+    PointMass{T} 
+
+Gravitational model of a point mass.
+"""
 struct PointMass{T} <: AbstractGravityModel{T}
-    bodyid::Int
-    μ::T # L³/T²
-    radius::T # L
+    id::Int
+    μ::T 
 end
 
 """
-    parse_model(::Type{T}, ::Type{PointMass}, bodyid::Int, μ::T, radius::T, args...) where {T}
+    parse_model(::Type{T}, ::Type{PointMass}, bodyid::Int, μ::T, args...) where {T}
 
 Parse a [`PointMass`](@ref) model for a body with NAIFID `bodyid`, gravitational parameter `μ`
 and `radius`.
 """
-function parse_model(::Type{T}, ::Type{PointMass}, bodyid::Int, μ::T, radius::T, args...) where {T}
-    return PointMass{T}(bodyid, μ, radius)
+function parse_model(::Type{T}, ::Type{PointMass}, bodyid::Int, μ::T, args...) where {T}
+    return PointMass{T}(bodyid, μ)
 end
 
 
@@ -31,6 +35,11 @@ to the particle.
     return -μ*r/rn3
 end
 
+"""
+    compute_acceleration(mod::PointMass{T}, pos::AbstractVector{T}, args...) where T 
+
+Compute acceleration, given the position vector, `pos` of a spacecraft, due to a point mass.
+"""
 function compute_acceleration(mod::PointMass{T}, pos::AbstractVector{T}, args...) where T 
     return compute_twobody(mod.μ, pos)
 end

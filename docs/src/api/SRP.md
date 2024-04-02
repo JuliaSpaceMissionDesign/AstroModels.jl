@@ -1,7 +1,7 @@
 ## [SolarPressure](@id astro_srp_api) 
 
 ```@autodocs
-Modules = [AstrodynamicModels.SolarPressure]
+Modules = [AstroModels.SolarPressure]
 Private = false
 Order = [:function]
 ```
@@ -9,7 +9,7 @@ Order = [:function]
 ### Types
 
 ```@autodocs
-Modules = [AstrodynamicModels.SolarPressure]
+Modules = [AstroModels.SolarPressure]
 Private = false
 Order = [:type]
 ```
@@ -21,7 +21,7 @@ Order = [:type]
 #### Functions
 
 ```@autodocs
-Modules = [AstrodynamicModels.SolarPressure]
+Modules = [AstroModels.SolarPressure]
 Public = false
 Order = [:function]
 ```
@@ -29,7 +29,7 @@ Order = [:function]
 #### Types
 
 ```@autodocs
-Modules = [AstrodynamicModels.SolarPressure]
+Modules = [AstroModels.SolarPressure]
 Public = false
 Order = [:type]
 ```
@@ -37,7 +37,7 @@ Order = [:type]
 #### Macros
 
 ```@autodocs
-Modules = [AstrodynamicModels.SolarPressure]
+Modules = [AstroModels.SolarPressure]
 Public = false
 Order = [:macro]
 ```
@@ -45,7 +45,7 @@ Order = [:macro]
 #### Constants
 
 ```@autodocs
-Modules = [AstrodynamicModels.SolarPressure]
+Modules = [AstroModels.SolarPressure]
 Public = false
 Order = [:constant]
 ```
