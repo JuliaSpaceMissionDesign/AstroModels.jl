@@ -140,12 +140,11 @@ end
 
 function _compute_acceleration_parallel(::T, p, pos) where T
     r = SVector{3}(pos[1], pos[2], pos[3])
-    
     nblocks = Threads.nthreads() 
     lk = ReentrantLock()
+
     δu_tot = SVector{3, T}(0, 0, 0)
     eblock = cld(length(p.edges), nblocks)
-
     Threads.@threads for t in 1:nblocks 
         δu_t = mapreduce(
             x->_edge_acceleration_update(p, x, r), +, 
