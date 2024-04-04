@@ -41,9 +41,9 @@ Compute the gravitational potential at a given position due to a polyhedron.
 function compute_potential(p::PolyhedronGravity{T}, pos::AbstractVector{<:Number}, 
     G, ρ, args...; parallel=false) where T
     if parallel
-        u = _compute_potential_parallel(typeof(pos[1]), p, pos)
+        u = _compute_potential_parallel(pos[1], p, pos)
     else
-        u = _compute_potential_serial(typeof(pos[1]), p, pos)
+        u = _compute_potential_serial(pos[1], p, pos)
     end
     U = 0.5 * G * ρ * u 
     return U
@@ -107,24 +107,31 @@ Compute the gravitational compute_acceleration at a given position due to a poly
 - `ρ`: Density.
 """
 function compute_acceleration(p::PolyhedronGravity{T}, pos::AbstractVector{<:Number}, 
-    G, ρ, args...) where T
-    r = SVector{3}(pos[1], pos[2], pos[3])
-
-    δue = SVector{3, T}(0, 0, 0)
-    # Loop over edges 
-    for e in p.edges    
-        Rₑ, Eₑ, Lₑ = precompute_edges(p, e, r)
-        δue += Eₑ * Rₑ * Lₑ
+    G, ρ, args...; parallel=false) where T
+    if parallel 
+        throw(ErrorException("Parallel acceleration computation not implemented."))
+    else
+        δu = _compute_potential_serial(pos[1], p, pos)
     end
 
-    δuf = SVector{3, T}(0, 0, 0)
-    # Loop over faces
-    for f in p.faces 
-        Rᵢ, F, ω = precompute_faces(p, f, r)
-        δuf += F * Rᵢ * ω
-    end
-
-    U = G * ρ * (- δue + δuf)
+    U = G * ρ * δu 
     return U
+end
+
+function _edge_acceleration_update(p, e, r)
+    Rₑ, Eₑ, Lₑ = precompute_edges(p, e, r)
+    return  Eₑ * Rₑ * Lₑ
+end
+
+function _face_acceleration_update(p, f, r)
+    Rᵢ, F, ω = precompute_faces(p, f, r)
+    return F * Rᵢ * ω
+end
+
+function _compute_acceleration_serial(::T, p, pos) where T
+    r = SVector{3}(pos[1], pos[2], pos[3])
+    δue = mapreduce(x->_edge_acceleration_update(p, x, r), +, p.edges)
+    δuf = mapreduce(x->_face_acceleration_update(p, x, r), +, p.faces)
+    return δuf - δue
 end
 
