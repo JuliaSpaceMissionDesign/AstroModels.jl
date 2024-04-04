@@ -68,17 +68,19 @@ end
 
 function _compute_potential_parallel(::T, p, pos) where T
     r = SVector{3}(pos[1], pos[2], pos[3])
-    
     nblocks = Threads.nthreads() 
-    u_tot = Threads.Atomic{T}(0.0)
-    eblock = cld(length(p.edges), nblocks)
+    lk = ReentrantLock()
 
+    u_tot = zero(T)
+    eblock = cld(length(p.edges), nblocks)
     Threads.@threads for t in 1:nblocks 
         u_t = mapreduce(
             x->_edge_potential_update(p, x, r), +, 
             @views(p.edges[(t-1)*eblock+1:min(t*eblock, length(p.edges))])
         )
-        Threads.atomic_add!(u_tot, u_t)
+        lock(lk) do 
+            u_tot += u_t
+        end
     end
 
     fblock = cld(length(p.faces), nblocks)
@@ -87,10 +89,11 @@ function _compute_potential_parallel(::T, p, pos) where T
             x->_face_potential_update(p, x, r), +, 
             @views(p.faces[(t-1)*fblock+1:min(t*fblock, length(p.faces))])
         )
-        Threads.atomic_sub!(u_tot, u_t)
+        lock(lk) do 
+            u_tot -= u_t
+        end
     end
-
-    return u_tot[]
+    return u_tot
 end
 
 
@@ -109,9 +112,9 @@ Compute the gravitational compute_acceleration at a given position due to a poly
 function compute_acceleration(p::PolyhedronGravity{T}, pos::AbstractVector{<:Number}, 
     G, ρ, args...; parallel=false) where T
     if parallel 
-        throw(ErrorException("Parallel acceleration computation not implemented."))
+        δu = _compute_acceleration_parallel(pos[1], p, pos)
     else
-        δu = _compute_potential_serial(pos[1], p, pos)
+        δu = _compute_acceleration_serial(pos[1], p, pos)
     end
 
     U = G * ρ * δu 
@@ -134,4 +137,37 @@ function _compute_acceleration_serial(::T, p, pos) where T
     δuf = mapreduce(x->_face_acceleration_update(p, x, r), +, p.faces)
     return δuf - δue
 end
+
+function _compute_acceleration_parallel(::T, p, pos) where T
+    r = SVector{3}(pos[1], pos[2], pos[3])
+    
+    nblocks = Threads.nthreads() 
+    lk = ReentrantLock()
+    δu_tot = SVector{3, T}(0, 0, 0)
+    eblock = cld(length(p.edges), nblocks)
+
+    Threads.@threads for t in 1:nblocks 
+        δu_t = mapreduce(
+            x->_edge_acceleration_update(p, x, r), +, 
+            @views(p.edges[(t-1)*eblock+1:min(t*eblock, length(p.edges))])
+        )
+        lock(lk) do 
+            δu_tot -= δu_t
+        end
+    end
+
+    fblock = cld(length(p.faces), nblocks)
+    Threads.@threads for t in 1:nblocks 
+        δu_t = mapreduce(
+            x->_face_acceleration_update(p, x, r), +, 
+            @views(p.faces[(t-1)*fblock+1:min(t*fblock, length(p.faces))])
+        )
+        lock(lk) do 
+            δu_tot += δu_t
+        end
+    end
+
+    return δu_tot
+end
+
 
