@@ -39,25 +39,58 @@ Compute the gravitational potential at a given position due to a polyhedron.
 
 """
 function compute_potential(p::PolyhedronGravity{T}, pos::AbstractVector{<:Number}, 
-    G, ρ, args...) where T
-    r = SVector{3}(pos[1], pos[2], pos[3])
-
-    ue = zero(T)
-    # Loop over edges 
-    for e in p.edges    
-        Rₑ, Eₑ, Lₑ = precompute_edges(p, e, r)
-        ue += Rₑ' * Eₑ * Rₑ * Lₑ
+    G, ρ, args...; parallel=false) where T
+    if parallel
+        u = _compute_potential_parallel(typeof(pos[1]), p, pos)
+    else
+        u = _compute_potential_serial(typeof(pos[1]), p, pos)
     end
-
-    uf = zero(T)
-    # Loop over faces
-    for f in p.faces 
-        Rᵢ, F, ω = precompute_faces(p, f, r)
-        uf += Rᵢ' * F * Rᵢ * ω
-    end
-
-    U = 0.5 * G * ρ * (ue - uf)
+    U = 0.5 * G * ρ * u 
     return U
+end
+
+function _edge_potential_update(p, e, r)
+    Rₑ, Eₑ, Lₑ = precompute_edges(p, e, r)
+    return Rₑ' * Eₑ * Rₑ * Lₑ
+end
+
+function _face_potential_update(p, f, r)
+    Rᵢ, F, ω = precompute_faces(p, f, r)
+    return Rᵢ' * F * Rᵢ * ω
+end
+
+function _compute_potential_serial(::T, p, pos) where T
+    r = SVector{3}(pos[1], pos[2], pos[3])
+    ue = mapreduce(x->_edge_potential_update(p, x, r), +, p.edges)
+    uf = mapreduce(x->_face_potential_update(p, x, r), +, p.faces)
+    return ue - uf
+end
+
+function _compute_potential_parallel(::T, p, pos) where T
+    r = SVector{3}(pos[1], pos[2], pos[3])
+    
+    nblocks = Threads.nthreads() 
+    u_tot = Threads.Atomic{T}(0.0)
+    eblock = cld(length(p.edges), nblocks)
+
+    Threads.@threads for t in 1:nblocks 
+        u_t = mapreduce(
+            x->_edge_potential_update(p, x, r), +, 
+            @views(p.edges[(t-1)*eblock+1:min(t*eblock, length(p.edges))])
+        )
+        Threads.atomic_add!(u_tot, u_t)
+    end
+
+    fblock = cld(length(p.faces), nblocks)
+    Threads.@threads for t in 1:nblocks 
+        u_t = mapreduce(
+            x->_face_potential_update(p, x, r), +, 
+            @views(p.faces[(t-1)*fblock+1:min(t*fblock, length(p.faces))])
+        )
+        Threads.atomic_sub!(u_tot, u_t)
+    end
+
+    return u_tot[]
 end
 
 
