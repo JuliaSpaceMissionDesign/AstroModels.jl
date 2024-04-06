@@ -5,6 +5,7 @@ module AstroModels
     using PreallocationTools
     
     include("interface.jl")
-    include("Gravity/Gravity.jl") 
+    include(joinpath("Gravity", "Gravity.jl"))
+    include(joinpath("SolarPressure", "SolarPressure.jl"))
 
 end

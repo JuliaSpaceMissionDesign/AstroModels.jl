@@ -3,9 +3,30 @@ export GravityHarmonics
 """
     GravityHarmonics{T} <: AbstractGravityModel
 
-Type to handle the gravity harmonics models within the JSMD context. User defined `degree` 
-and `order` can be supplied using the [`parse_model`](@ref) constructor associated with 
-the `GravityHarmonics` type.
+Type to efficiently handle gravity harmonics models. 
+It stores both the coefficients, some precomputed coefficients as well as a computation 
+cache for efficiency. Implementation according to Montenbruck (2002).
+
+### Fields 
+
+- `degree`: expansion degree. 
+- `zonal`: boolean denoting if the computation is performed with only zonal terms. 
+- `C, S`: spherical harmonics coefficients.
+- `N, η0, η1, ∂η0, ∂η1, ∂η2, ∂η3`: precomputed coefficients.
+- `V, W`: caches terms computation. 
+    
+---
+
+    GravityHarmonics(C::AbstractMatrix{T}, S::AbstractMatrix{T}, deg::Int; 
+        onlyzonal::Bool=false) 
+
+Construct gravity harmonics cache given the coefficients, `C` and `S` and the expansion 
+degree `deg`. Full expansion or zonal-only expansions could be retrieved setting `onlyzonal` 
+either to `false` or `true`. 
+
+### References
+- Montenbruck, O., Gill, E., & Lutze, F. (2002). Satellite orbits: models, methods, and 
+  applications. Appl. Mech. Rev., 55(2), B27-B28.
 """
 struct GravityHarmonics{T} <: AbstractGravityModel{T}
     degree::Int
@@ -142,7 +163,7 @@ function precompute_∂coefficients!(∂η0, ∂η1, ∂η2, ∂η3, N, deg)
     nothing
 end
 
-function GravityHarmonics(C::AbstractMatrix{T}, S::AbstractMatrix{T}, deg::Int, onlyzonal::Bool) where T 
+function GravityHarmonics(C::AbstractMatrix{T}, S::AbstractMatrix{T}, deg::Int; onlyzonal::Bool=false) where T 
     nth = Threads.nthreads()
     V = zeros(T, deg+2, deg+2, nth)
     W = zeros(T, deg+2, deg+2, nth)
@@ -167,13 +188,28 @@ function GravityHarmonics(C::AbstractMatrix{T}, S::AbstractMatrix{T}, deg::Int, 
     )
 end
 
-@inline @inbounds function terms(gh::GravityHarmonics, x) 
+"""
+    terms(gh::GravityHarmonics, x)
+
+Extracts the precomputed terms `V` and `W` from the `GravityHarmonics` object. `x` is 
+necessary to access a `DiffCache` with the proper type.
+
+This function operates in a multi-threaded environment and ensures thread safety.
+"""
+@inline function terms(gh::GravityHarmonics, x) 
     tid = Threads.threadid()    
-    V = @view get_tmp(gh.V, x)[:, :, tid]
-    W = @view get_tmp(gh.W, x)[:, :, tid]
+    @inbounds begin
+        V = @view get_tmp(gh.V, x)[:, :, tid]
+        W = @view get_tmp(gh.W, x)[:, :, tid]
+    end
     return V, W
 end
 
+"""
+    coefficients(gh::GravityHarmonics)
+
+Returns the coefficients `C` and `S` from the given model.
+"""
 @inline coefficients(gh::GravityHarmonics) = (gh.C, gh.S)
 
 function parse_model(
@@ -200,6 +236,6 @@ function parse_model(
 
     C = convert(Matrix{T}, @views(data.Clm[1:degree+1, 1:degree+1]))
     S = convert(Matrix{T}, @views(data.Slm[1:degree+1, 1:degree+1]))
-    return GravityHarmonics(C, S, degree, onlyzonal)
+    return GravityHarmonics(C, S, degree; onlyzonal=onlyzonal)
    
 end

@@ -12,12 +12,19 @@ makedocs(;
         "Home" => "index.md", 
         "API" => 
         [
-            "Gravity" => "api/Gravity.md",
-            # "SRP" => "api/SRP.md",
+            "Gravity" => [
+                "Interface" => "api/Gravity/interface.md",
+                "Point Mass" => "api/Gravity/point.md",
+                "Spherical Harmonics" => "api/Gravity/spharm.md",
+                "Polyhedron" => "api/Gravity/poly.md"
+            ],
+            "SRP" => "api/SRP.md",
             # "Atmosphere" => "api/Atmosphere.md"
         ]
     ],
     clean=true,
+    doctest=false,
+    warnonly=true
 )
 
 # deploydocs(;

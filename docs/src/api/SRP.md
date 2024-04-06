@@ -1,9 +1,9 @@
-# [Gravity](@id astro_gravity_api) 
+# [Solar Pressure](@id astro_srp_api) 
 
 ### Public
 
 ```@autodocs
-Modules = [AstroModels.Gravity]
+Modules = [AstroModels.SolarPressure]
 Private = false
 Order = [:type, :function]
 ```
@@ -13,7 +13,7 @@ Order = [:type, :function]
 ### Internals
 
 ```@autodocs
-Modules = [AstroModels.Gravity]
+Modules = [AstroModels.SolarPressure]
 Public = false
 Order = [:function, :type, :macro, :constant]
 ```

@@ -1,10 +1,10 @@
-export PolyhedronGravityData
+export GravityPolyhedronData
 
 """
 
-    PolyhedronGravityData{T} <: AbstractGravityModelData
+    GravityPolyhedronData{T} <: AbstractGravityModelData
 
-A `PolyhedronGravityData` instance represents data for a polyhedron used in gravity modeling. 
+A `GravityPolyhedronData` instance represents data for a polyhedron used in gravity modeling. 
 It contains information about vertices, faces, and adjacency relationships between faces.
 
 # Fields
@@ -14,28 +14,28 @@ It contains information about vertices, faces, and adjacency relationships betwe
 
 --- 
 
-    PolyhedronGravityData{T}(filename::AbstractString)
+    GravityPolyhedronData{T}(filename::AbstractString)
 
-Create a `PolyhedronGravityData` object from an ``obj`` file.
+Create a `GravityPolyhedronData` object from an `.obj` file.
 This format requires vertices and faces to be in the same file and be organized using a prefix:
-``v`` for vertices and ``f`` for faces. Lines starting with ``#`` are comments and will be ingnored.
+`v` for vertices and `f` for faces. Lines starting with `#` are comments and will be ingnored.
 
 ---
 
-    PolyhedronGravityData{T}(nodefile::AbstractString, facefile::AbstractString)
+    GravityPolyhedronData{T}(nodefile::AbstractString, facefile::AbstractString)
 
-Create a `PolyhedronGravityData` object from ``node`` and ``face`` files.
+Create a `GravityPolyhedronData` object from `.node` and `.face` files.
 This format require a separated file for nodes and faces. Each file contains three columns with 
-data. Lines starting with ``#`` are comments and will be ingnored.
+data. Lines starting with `#` are comments and will be ingnored.
 
 ---
 
-    PolyhedronGravityData{T}(vertices, faces)
+    GravityPolyhedronData{T}(vertices, faces)
 
-Create a `PolyhedronGravityData` object from vertices and faces.
+Create a `GravityPolyhedronData` object from vertices and faces.
 
 """
-struct PolyhedronGravityData{T} <: AbstractGravityModelData
+struct GravityPolyhedronData{T} <: AbstractGravityModelData
     vertices::Vector{SVector{3, T}}
     faces::Vector{SVector{3, Int}}
     adj::Dict{NTuple{2, Int}, Vector{Int}}
@@ -64,6 +64,15 @@ function _parse_row(::Type{T}, parts, first) where T
     )
 end
 
+
+"""
+    parse_objfile(::Type{T}, filename::AbstractString)
+
+Parses an `.obj` file and extracts vertex and face data.
+
+Returs `vertices`, that is an array of `SVector{3, T}` containing vertex coordinates,
+and `faces` that is an array of `SVector{3, Int}` representing faces as vertex indices.
+"""
 function parse_objfile(::Type{T}, filename::AbstractString) where T
     vertices = SVector{3, T}[]
     faces = SVector{3, Int}[]
@@ -91,6 +100,12 @@ function parse_objfile(::Type{T}, filename::AbstractString) where T
     return vertices, faces
 end
 
+"""
+    parse_nodefile(::Type{T}, filename::AbstractString)
+
+Parses an `.node` or `.face` files and extracts vertex or face data.
+Returs `data`, that is an array of `SVector{3, T}` containing vertex or faces coordinates.
+"""
 function parse_nodefile(::Type{T}, filename::AbstractString) where T 
     data = SVector{3, T}[]
     open(filename, "r") do file 
@@ -109,17 +124,18 @@ function parse_nodefile(::Type{T}, filename::AbstractString) where T
             end
         end
     end
+    return data
 end
 
-function PolyhedronGravityData{T}(filename::AbstractString) where T
+function GravityPolyhedronData{T}(filename::AbstractString) where T
     if !endswith(filename, ".obj")
         throw(ErrorException("File '$filename' cannot be processed, unknown format."))
     end
     vertices, faces = parse_objfile(T, filename)
-    return PolyhedronGravityData{T}(vertices, faces)
+    return GravityPolyhedronData{T}(vertices, faces)
 end
 
-function PolyhedronGravityData{T}(nodefile::AbstractString, facefile::AbstractString) where T 
+function GravityPolyhedronData{T}(nodefile::AbstractString, facefile::AbstractString) where T 
     if !endswith(nodefile, ".node")
         throw(ErrorException("File '$nodefile' cannot be processed, unknown format, shall be '.node'."))
     end
@@ -129,31 +145,31 @@ function PolyhedronGravityData{T}(nodefile::AbstractString, facefile::AbstractSt
 
     vertices = parse_nodefile(T, nodefile)
     faces = parse_nodefile(Int, facefile)
-    return PolyhedronGravityData{T}(vertices, faces)
+    return GravityPolyhedronData{T}(vertices, faces)
 end
 
-function  PolyhedronGravityData{T}(vertices, faces) where T 
+function  GravityPolyhedronData{T}(vertices, faces) where T 
     adj = unique_edges(faces)
-    return PolyhedronGravityData{T}(vertices, faces, adj)
+    return GravityPolyhedronData{T}(vertices, faces, adj)
 end
 
-function parse_data(::Type{T}, ::Type{PolyhedronGravityData}, filename::AbstractString) where T
-    return PolyhedronGravityData{T}(filename)
+function parse_data(::Type{T}, ::Type{GravityPolyhedronData}, filename::AbstractString) where T
+    return GravityPolyhedronData{T}(filename)
 end
 
-@inline vertices(p::PolyhedronGravityData) = p.vertices
-@inline faces(p::PolyhedronGravityData) = p.faces
-@inline face(p::PolyhedronGravityData, i) = @inbounds faces(p)[i]
-@inline edges(p::PolyhedronGravityData) = p.adj
+@inline vertices(p::GravityPolyhedronData) = p.vertices
+@inline faces(p::GravityPolyhedronData) = p.faces
+@inline face(p::GravityPolyhedronData, i) = @inbounds faces(p)[i]
+@inline edges(p::GravityPolyhedronData) = p.adj
 
 # triplet of vertices associated to a face
-@inbounds function triplet(p::PolyhedronGravityData{T}, i) where T
+@inbounds function triplet(p::GravityPolyhedronData{T}, i) where T
     f = face(p, i)
     return vertices(p)[f[1]], vertices(p)[f[2]], vertices(p)[f[3]]
 end
 
 # compute the normal of a face 
-function face_normal(p::PolyhedronGravityData{T}, i) where T 
+function face_normal(p::GravityPolyhedronData{T}, i) where T 
     p1, p2, p3 = triplet(p, i)
     e1 = p2 - p1 
     e2 = p3 - p2
@@ -161,7 +177,7 @@ function face_normal(p::PolyhedronGravityData{T}, i) where T
 end
 
 # compute the edges vectors of a face
-function face_edges(p::PolyhedronGravityData{T}, i) where T
+function face_edges(p::GravityPolyhedronData{T}, i) where T
     p1, p2, p3 = triplet(p, i)
     e1 = p2 - p1 
     e2 = p3 - p2 
@@ -170,13 +186,13 @@ function face_edges(p::PolyhedronGravityData{T}, i) where T
 end
 
 # return the i face edges indexes (properly ordered)
-function face_edges_index(p::PolyhedronGravityData{T}, i) where T 
+function face_edges_index(p::GravityPolyhedronData{T}, i) where T 
     @inbounds v1, v2, v3 = faces(p)[i]
     return (v1, v2), (v2, v3), (v3, v1)
 end
 
 # find edge indexes given an unordered set of indexes
-function find_edge(p::PolyhedronGravityData{T}, f, edge_idxs) where T
+function find_edge(p::GravityPolyhedronData{T}, f, edge_idxs) where T
     e1, e2, e3 = face_edges_index(p, f)
     sedge = Set(edge_idxs)
     if Set(e1) == sedge
@@ -189,18 +205,35 @@ function find_edge(p::PolyhedronGravityData{T}, f, edge_idxs) where T
 end
 
 # compute centroid of the face
-function face_centroid(p::PolyhedronGravityData{T}, i) where T
+function face_centroid(p::GravityPolyhedronData{T}, i) where T
     p1, p2, p3 = triplet(p, i)
     return (p1 + p2 + p3) / 3
 end
 
+"""
+    FaceProperties{T}
+
+Stores properties of a face in a polyhedron gravity model.
+
+### Fields
+- `vertices`: Vertices of the face.
+- `normal`: Normal vector of the face.
+- `dyad`: Dyad formed by the normal vector.
+
+--- 
+
+    FaceProperties(p::GravityPolyhedronData{T}, i) where T
+
+Constructs a `FaceProperties` object from a [`GravityPolyhedronData`](@ref) object and 
+an index `i` representing the face.
+"""
 struct FaceProperties{T}
     vertices::SVector{3, Int}
     normal::SVector{3, T}
     dyad::SMatrix{3, 3, T, 9}
 end
 
-function FaceProperties(p::PolyhedronGravityData{T}, i) where T
+function FaceProperties(p::GravityPolyhedronData{T}, i) where T
     @inbounds v = faces(p)[i]
     n = face_normal(p, i)
     
@@ -209,18 +242,36 @@ function FaceProperties(p::PolyhedronGravityData{T}, i) where T
     return FaceProperties{T}(v, n, F)
 end
 
+"""
+    EdgeProperties{T}
+
+Stores properties of an edge in a polyhedron gravity model.
+
+### Fields
+- `vertices`: Vertices of the edge.
+- `magnitude`: Length of the edge.
+- `dyad`: Dyad formed by the edge and the normals associated to its adjacent faces.
+
+--- 
+
+    EdgeProperties(p::GravityPolyhedronData{T}, adjfaces, faceprops) where T
+
+Constructs an `EdgeProperties` object from a `GravityPolyhedronData`, `adjfaces`, 
+containing the IDs of the two adjacent faces associated with the edge, 
+and `faceprops`, a vector containing all the [`FaceProperties`](@ref) of the model.
+"""
 struct EdgeProperties{T}
     vertices::Set{Int}
     magnitude::T
     dyad::SMatrix{3, 3, T, 9}
 end
 
-function EdgeProperties(p::PolyhedronGravityData{T}, edge, fprops) where T
-    @inbounds f₁, f₂ = edges(p)[edge]
+function EdgeProperties(p::GravityPolyhedronData{T}, adjfaces, fprops) where T
+    @inbounds f₁, f₂ = edges(p)[adjfaces]
     
     # indexes of the two edges for the respective faces
     # find the first one, the one associated to the adjacent face is simply the opposite 
-    v₁, v₂ = find_edge(p, f₁, edge)
+    v₁, v₂ = find_edge(p, f₁, adjfaces)
 
     # edges
     e₁ = vertices(p)[v₂] - vertices(p)[v₁]
@@ -231,5 +282,5 @@ function EdgeProperties(p::PolyhedronGravityData{T}, edge, fprops) where T
 
     # dyads
     E = n₁*ne₁' + n₂*ne₂'
-    return EdgeProperties{T}(Set(edge), norm(e₁), E)
+    return EdgeProperties{T}(Set(adjfaces), norm(e₁), E)
 end

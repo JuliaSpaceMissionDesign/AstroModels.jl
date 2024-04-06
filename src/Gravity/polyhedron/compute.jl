@@ -26,19 +26,19 @@ end
 end
 
 """
-    compute_potential(p::PolyhedronGravity{T}, pos::AbstractVector{<:Number}, 
-        G, ρ, args...) where T
+    compute_potential(p::GravityPolyhedron{T}, pos::AbstractVector{<:Number}, 
+        G, ρ, args...; parallel=false) where T
 
 Compute the gravitational potential at a given position due to a polyhedron.
 
-# Arguments
-- `p`: `PolyhedronGravity` object representing the polyhedron.
+### Arguments
+- `p`: `GravityPolyhedron` object representing the polyhedron.
 - `pos`: Position vector where the potential is computed.
 - `G`: Gravitational constant.
 - `ρ`: Density.
-
+- `parallel`: Boolean to switch on multithreaded execution. Default `false`.
 """
-function compute_potential(p::PolyhedronGravity{T}, pos::AbstractVector{<:Number}, 
+function compute_potential(p::GravityPolyhedron{T}, pos::AbstractVector{<:Number}, 
     G, ρ, args...; parallel=false) where T
     if parallel
         u = _compute_potential_parallel(pos[1], p, pos)
@@ -98,18 +98,19 @@ end
 
 
 """
-    compute_acceleration(p::PolyhedronGravity{T}, pos::AbstractVector{<:Number}, 
-        G, ρ, args...) where T
+    compute_acceleration(p::GravityPolyhedron{T}, pos::AbstractVector{<:Number}, 
+        G, ρ, args...; parallel=false) where T
 
 Compute the gravitational compute_acceleration at a given position due to a polyhedron.
 
-# Arguments
-- `p`: `PolyhedronGravity` object representing the polyhedron.
+### Arguments
+- `p`: `GravityPolyhedron` object representing the polyhedron.
 - `pos`: Position vector where the potential is computed.
 - `G`: Gravitational constant.
 - `ρ`: Density.
+- `parallel`: Boolean to switch on multithreaded execution. Default `false`.
 """
-function compute_acceleration(p::PolyhedronGravity{T}, pos::AbstractVector{<:Number}, 
+function compute_acceleration(p::GravityPolyhedron{T}, pos::AbstractVector{<:Number}, 
     G, ρ, args...; parallel=false) where T
     if parallel 
         δu = _compute_acceleration_parallel(pos[1], p, pos)

@@ -9,8 +9,11 @@ const P₀ = G_SC / SPEED_OF_LIGHT * 1e-3 # Solar pressure constant at 1 AU in m
 """
     compute_srp_magnitude(S::Number)
 
-Compute solar pressure for a given distance `S` from the Sun. Distance in `km`.
-The solar pressure is returned in `mPa` e.g. to be used with `m^2` areas `km` distances.
+Compute solar pressure for a given distance `S` from the Sun. 
+
+!!! warning "Units constraint"
+
+    The solar pressure is returned in `mPa` e.g. to be used with `m^2` areas and `km` distances.
 """
 @inline function compute_srp_pressure(::InverseSquareSunPressure, s::Number)
     tmp = 149_597_870.7 / s # Calculate the distance ratio (AU divided by distance from the Sun)

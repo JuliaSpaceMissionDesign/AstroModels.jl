@@ -21,6 +21,10 @@ export parse_data, parse_model, compute_acceleration, compute_potential
 # Interface types/methods
 include("interface.jl")
 
+# Point mass 
+include("point/center.jl")
+include("point/third.jl")
+
 # Gravity harmonics
 include("harmonics/parse.jl")
 include("harmonics/type.jl")
@@ -30,9 +34,5 @@ include("harmonics/compute.jl")
 include("polyhedron/parse.jl")
 include("polyhedron/type.jl")
 include("polyhedron/compute.jl")
-
-# Point mass 
-include("point/center.jl")
-include("point/third.jl")
 
 end

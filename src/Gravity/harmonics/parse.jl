@@ -1,4 +1,4 @@
-export GravityHarmonicsICGEMData, GravityHarmonicsPDSData, parse_data
+export GravityHarmonicsICGEMData, GravityHarmonicsPDSData
 
 """
     AbstractGravityHarmonicsData{N, T}
@@ -18,7 +18,6 @@ Data container for spherical harmonics data from the Geosciences Node of NASA's
 [Planetary Data System (PDS)](https://pds-geosciences.wustl.edu/default.htm).
 
 ### Fields 
-
 - `μ` -- gravitational constant (km³/s²)
 - `radius` -- reference radius of the spherical harmonic development (km)
 - `max_degree` -- maximum degree of the model 
@@ -26,7 +25,7 @@ Data container for spherical harmonics data from the Geosciences Node of NASA's
 - `Clm, Slm` -- spherical harmonics constants
 
 ### References 
-- https://pds-geosciences.wustl.edu/dataserv/gravity_model_desc.htm
+- [https://pds-geosciences.wustl.edu/dataserv/gravity\\_model\\_desc.htm](https://pds-geosciences.wustl.edu/dataserv/gravity_model_desc.htm)
 """
 struct GravityHarmonicsPDSData{N, T} <: AbstractGravityHarmonicsData{N, T}
     μ::T # km³/s²
@@ -45,39 +44,35 @@ function Base.show(io::IO, gd::GravityHarmonicsPDSData{N, T}) where {N, T}
 end
 
 """
-    parse_data(::Type{T}, ::Type{GravityHarmonicsPDSData}, filename::AbstractString;
-        maxdegree::Int=-1) where T
+    parse_pdsfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) where T 
 
-Parse data associated to a `GravityHarmonics` model from NASA's PDS SHA files.
+Parse NASA's PDS SHA file data.
 
-### Parameters
-
+### Arguments
 - `filename` -- name of the file to be parsed 
 - `maxdegree` -- maximum degree of the harmonics to be saved in memory after reading. 
-                 Optional, default is -1 indicating that all the coefficients shall be loaded.
+                 Optional, default is `-1` indicating that all the coefficients shall be loaded.
 
 ### References
-- [https://pds-geosciences.wustl.edu/dataserv/gravity_model_desc.htm](https://pds-geosciences.wustl.edu/dataserv/gravity_model_desc.htm)
-- [https://pds-geosciences.wustl.edu/mro/mro-m-rss-5-sdp-v1/mrors_1xxx/data/shadr/ggmro_095a_sha.lbl](https://pds-geosciences.wustl.edu/mro/mro-m-rss-5-sdp-v1/mrors_1xxx/data/shadr/ggmro_095a_sha.lbl)
-- [https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/gggrx_1200a_sha.lbl](https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/gggrx_1200a_sha.lbl)
-- [https://pds-geosciences.wustl.edu/messenger/mess-h-rss_mla-5-sdp-v1/messrs_1001/data/shadr/jgmess_160a_sha.tab](https://pds-geosciences.wustl.edu/messenger/mess-h-rss_mla-5-sdp-v1/messrs_1001/data/shadr/jgmess_160a_sha.tab)
+- [https://pds-geosciences.wustl.edu/dataserv/gravity\\_model\\_desc.htm](https://pds-geosciences.wustl.edu/dataserv/gravity_model_desc.htm)
 """
-function parse_data(::Type{T}, ::Type{GravityHarmonicsPDSData}, filename::AbstractString; 
-    maxdegree::Int=-1) where T 
+function parse_pdsfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) where T 
+    line = strip.(split(strip(readline(open(filename, "r"))), ","))
 
-    fn = open(filename, "r")
-
-    line = strip.(split(strip(readline(fn)), ","))
     radius = parse(T, line[1])
     μ = parse(T, line[2])
     deg = parse(Int, line[4])
     normalized = parse(Int, line[6]) == 1
 
     ref_lon = parse(T, line[7])
-    ref_lon != zero(T) && @warn "Reference longitude for the a spherical harmonics model is $ref_lon (deg)"
+    if ref_lon != zero(T) 
+        @warn "Reference longitude for the $filename spherical harmonics model is $ref_lon (deg)"
+    end
     ref_lat = parse(T, line[8])
-    ref_lat != zero(T) && @warn "Reference latitude for the a spherical harmonics model is $ref_lat (deg)"
-    
+    if ref_lat != zero(T) 
+        @warn "Reference latitude for the $filename spherical harmonics model is $ref_lat (deg)"
+    end 
+
     # Maximum degree check
     if maxdegree == -1 
         maxdegree = deg  
@@ -103,8 +98,26 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsPDSData}, filename::Abstra
         end
     end
 
-    return GravityHarmonicsPDSData{maxdegree, T}(μ, radius, maxdegree, normalized, Clm, Slm)
+    return μ, radius, maxdegree, normalized, Clm, Slm
 end
+
+"""
+    parse_data(::Type{T}, ::Type{GravityHarmonicsPDSData}, filename::AbstractString;
+        maxdegree::Int=-1) where T
+
+Parse data associated to a [`GravityHarmonics`](@ref) model from NASA's PDS SHA files.
+
+See also: [`parse_pdsfile`](@ref), [`GravityHarmonicsPDSData`](@ref).
+"""
+function parse_data(::Type{T}, ::Type{GravityHarmonicsPDSData}, filename::AbstractString, args...; 
+    maxdegree::Int=-1) where T 
+    μ, radius, maxdeg, normalized, Clm, Slm = parse_pdsfile(T, filename; maxdegree=maxdegree)
+    return GravityHarmonicsPDSData{maxdeg, T}(μ, radius, maxdeg, normalized, Clm, Slm)
+end
+
+# -------------------------------------
+# ICGEM gravity harmonics data (static)
+# -------------------------------------
 
 """
     GravityHarmonicsICGEMData{N, T} <: AbstractGravityHarmonicsData{N, T}
@@ -140,14 +153,11 @@ function Base.show(io::IO, gd::GravityHarmonicsICGEMData{N, T}) where {N, T}
 end
 
 """
-    parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::AbstractString;
-        maxdegree::Int=-1) where T
+    parse_gfcfile(::Type{T}, ilename::AbstractString; maxdegree::Int=-1) where T
 
-Parse data associated to a `GravityHarmonics` model from International Centre for Global 
-Earth Models `gfc` models.
+Parse an International Centre for Global Earth Models `gfc` model file.
 
-### Parameters
-
+### Arguments
 - `filename` -- name of the file to be parsed 
 - `maxdegree` -- maximum degree of the harmonics to be saved in memory after reading. 
                  Optional, default is -1 indicating that all the coefficients shall be loaded.
@@ -155,8 +165,8 @@ Earth Models `gfc` models.
 ### References
 - [http://icgem.gfz-potsdam.de/ICGEM-Format-2023.pdf](http://icgem.gfz-potsdam.de/ICGEM-Format-2023.pdf)
 """
-function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::AbstractString; 
-    maxdegree::Int=-1) where T 
+function parse_gfcfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) where T 
+    
     file = open(filename, "r")
 
     # --------------------------------------------------------------------------------------
@@ -311,7 +321,8 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::Abst
         end
     end
 
-    return GravityHarmonicsICGEMData{maxdegree, T}(
+
+    return (
         DATA[:gravity_constant]/1e9, # to km^3/s^2
         DATA[:radius]/1e3, # to km 
         maxdegree, 
@@ -319,4 +330,19 @@ function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::Abst
         DATA[:tide_system], 
         Clm, Slm
     )
+end
+
+"""
+    parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::AbstractString;
+        maxdegree::Int=-1) where T
+
+Parse data associated to a [`GravityHarmonics`](@ref) model from International Centre for Global 
+Earth Models `gfc` models.
+
+See also: [`parse_gfcfile`](@ref), [`GravityHarmonicsICGEMData`](@ref).
+"""
+function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::AbstractString, args...; 
+    maxdegree::Int=-1) where T 
+    μ, radius, maxdeg, normalized, tide, Clm, Slm = parse_gfcfile(T, filename; maxdegree=maxdegree)
+    return GravityHarmonicsICGEMData{maxdeg, T}(μ, radius, maxdeg, normalized, tide, Clm, Slm)
 end

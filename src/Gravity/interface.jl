@@ -20,7 +20,7 @@ abstract type AbstractGravityModel{T} <: AbstractAccelerationModel end
 This function serves as an interface for constructing gravitational potentials models.
 
 ### Arguments
-- `m::A`: An instance of a subtype of `AbstractGravityModel`, representing the 
+- `m`: An instance of a subtype of `AbstractGravityModel`, representing the 
     gravity model producing the potential.
 
 !!! warning 

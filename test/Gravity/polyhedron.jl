@@ -74,11 +74,11 @@ POLY_POTENTIAL = [
     ([-29.754993148283393, 36.34285563630308, -23.78709379249818], 34.78352544714981),
 ]
 
-@test_nowarn PolyhedronGravityData{Float64}(POLY_VERTICES, POLY_FACES)
-p = PolyhedronGravityData{Float64}(POLY_VERTICES, POLY_FACES)
+@test_nowarn GravityPolyhedronData{Float64}(POLY_VERTICES, POLY_FACES)
+p = GravityPolyhedronData{Float64}(POLY_VERTICES, POLY_FACES)
 
-@test_nowarn parse_model(Float64, PolyhedronGravity, p)
-m = parse_model(Float64, PolyhedronGravity, p)
+@test_nowarn parse_model(Float64, GravityPolyhedron, p)
+m = parse_model(Float64, GravityPolyhedron, p)
 
 @testset "Face normals" begin 
     for f in eachindex(p.faces)

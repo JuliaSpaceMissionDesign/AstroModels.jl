@@ -47,6 +47,19 @@
 
 end
 
+"""
+    compute_potential(gh::GravityHarmonics{T}, pos::AbstractVector{<:Number}, μ, radius; 
+        recompute=true) where T 
+
+Computes the spherical harmonics gravitational potential at a given position `pos`.
+
+### Arguments
+- `gh`: The `GravityHarmonics` object.
+- `pos`: Position vector.
+- `μ`: Gravitational parameter.
+- `radius`: Planetary radius.
+- `recompute`: Whether to recompute terms before the computation. Default is `true`.
+"""
 function compute_potential(gh::GravityHarmonics{T}, pos::AbstractVector{<:Number}, μ, radius; 
     recompute=true) where T 
     
@@ -71,6 +84,19 @@ function compute_potential(gh::GravityHarmonics{T}, pos::AbstractVector{<:Number
     return μ/radius * u
 end
 
+"""
+    compute_acceleration(gh::GravityHarmonics{T}, pos::AbstractVector{<:Number}, μ, radius; 
+        recompute=true) where T 
+
+Computes the spherical harmonics gravitational acceleration at a given position `pos`.
+
+### Arguments
+- `gh`: The `GravityHarmonics` object.
+- `pos`: Position vector.
+- `μ`: Gravitational parameter.
+- `radius`: Planetary radius.
+- `recompute`: Whether to recompute terms before the computation. Default is `true`.
+"""
 function compute_acceleration(gh::GravityHarmonics{T}, pos::AbstractVector{<:Number}, μ, radius, 
     args...; recompute=true) where {T} 
     # Precompute terms on the current thread

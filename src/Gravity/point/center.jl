@@ -1,4 +1,4 @@
-export PointMass, parse_model 
+export PointMass 
 
 """
     PointMass{T} 
