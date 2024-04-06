@@ -32,7 +32,7 @@ take into account possible auto occultation between the different plates.
 
         # Compute total acceleration
         # Zardain, eq. 5
-        return P * Ai/M * cosθ * ( as + an )
+        return - P * Ai/M * cosθ * ( as + an )
     else 
         return 0 * us 
     end

@@ -3,7 +3,7 @@ export compute_srp_cannonball
 
 @fastmath function _cannonball(ρ, A, M, P, sm, s)
     sm3 = sm*sm*sm
-    return - (1+ρ)*P*A/M * s/sm3
+    return (1+ρ)*P*A/M * s/sm3
 end
 
 """
