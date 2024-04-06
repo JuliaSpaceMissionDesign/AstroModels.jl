@@ -22,11 +22,10 @@ take into account possible auto occultation between the different plates.
 """
 @fastmath function compute_srp_flatplate(ρsi, ρdi, Ai, M, P, ni::AbstractVector{<:Number}, 
     us::AbstractVector{<:Number}) 
-
     # Compute unit vectors and illumination
     cosθ = us[1]*ni[1] + us[2]*ni[2] + us[3]*ni[3]
 
-    if cosθ < 0 
+    if cosθ < 0
         # Compute acceleration components along sun and normal direction
         as = (1-ρsi) * us 
         an = 2*(ρsi*cosθ + ρdi/3) * ni
@@ -35,7 +34,7 @@ take into account possible auto occultation between the different plates.
         # Zardain, eq. 5
         return P * Ai/M * cosθ * ( as + an )
     else 
-        return 0 * us
+        return 0 * us 
     end
 end
 
