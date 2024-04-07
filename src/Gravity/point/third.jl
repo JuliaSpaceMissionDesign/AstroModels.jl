@@ -33,19 +33,32 @@ end
 """
     compute_acceleration(center::PointMass{T}, pos::AbstractVector{N}, 
         third::AbstractVector{PointMass{T}}, axes, epoch, frames::G, 
-        args...) where {T, N<:Number, G <:AbstractJSMDFrameGraph}
+        args...; corrected=false) where {T, N<:Number, G <:AbstractJSMDFrameGraph}
 
 Compute accelerations due to third body perturbations in a planetocentric case.
 """
 function compute_acceleration(center::PointMass{T}, pos::AbstractVector{N}, 
     third::AbstractVector{PointMass{T}}, axes, epoch, frames::G, 
-    args...) where {T, N<:Number, G <:AbstractJSMDFrameGraph}
-
-    a = compute_twobody(center.μ, pos)
-    for p in third
-        Δp = vector3(frames, center.id, p.id, axes, epoch)
-        a += compute_thirdbody(pos, Δp, p.μ)
-    end
-    return a
+    args...; corrected=false) where {T, N<:Number, G <:AbstractJSMDFrameGraph}
     
+    a = compute_twobody(center.μ, pos)
+    if !corrected
+        for p in third
+            Δp = vector3(frames, center.id, p.id, axes, epoch)
+            a += compute_thirdbody(pos, Δp, p.μ)
+        end
+        return a
+    else 
+        # compute direct contributions on the spacecraft
+        for p in third 
+            Δp = vector3(frames, center.id, p.id, axes, epoch)
+            Rp = pos - Δp 
+            a += compute_twobody(center.μ, Rp)
+        end
+        # apply corrections - direct contributions on the planet
+        # NOTE: this requires the barycenter to be registered and be 0.
+        tmp = vector9(frames, 0, center.id, axes, epoch)
+        ā = SVector{3, N}(tmp[7], tmp[8], tmp[9])
+        return a - ā    
+    end
 end
