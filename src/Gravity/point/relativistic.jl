@@ -59,7 +59,7 @@ struct RelativisticPPNCorrections{T} <: AbstractGravityModel{T}
     acc::Vector{SVector{3, T}}
 end
 
-function RelativisticPPNCorrections(bodies::Vector{PointMass{T}}, β, γ, c)
+function RelativisticPPNCorrections(bodies::Vector{PointMass{T}}, β, γ, c) where T
     nbodies = length(bodies)
     pc = [@SVector zeros(T, 3) for _ in 1:nbodies]
     vc = similar(pc)
