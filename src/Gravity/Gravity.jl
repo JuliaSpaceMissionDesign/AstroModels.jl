@@ -24,6 +24,7 @@ include("interface.jl")
 # Point mass 
 include("point/center.jl")
 include("point/third.jl")
+include("point/relativistic.jl")
 
 # Gravity harmonics
 include("harmonics/parse.jl")
