@@ -110,8 +110,53 @@ end
     
     end
 
+end
+
+
+@testset "PDS based, static model" verbose=true begin 
+   
+    PATH_PDS = artifact"JGL100K" 
+    DATA_PDS = parse_data(
+        Float64, GravityHarmonicsPDSData, joinpath(PATH_PDS, "jgl100k1.sha"); 
+        maxdegree=51
+    )
+
+    @testset "Accelerations" verbose=true begin
     
-
-
-
+        @testset "zonal terms" verbose=true begin
+            degree = 10
+            mz = parse_model(Float64, GravityHarmonics, DATA_PDS, degree, true)
+        
+            for _ in 1:1000
+                pos = rand(3)
+                pos /= norm(pos)
+                radius = 1 
+                μ = 1 
+        
+                fd = ForwardDiff.gradient(x->compute_potential(mz, x, μ, radius), pos)
+                an = compute_acceleration(mz, pos, μ, radius)
+        
+                @test maximum(abs.(fd-an)) ≤ 1e-14
+            end
+        end    
+    
+        @testset "all terms" verbose=true begin
+            degree = 10
+            m = parse_model(Float64, GravityHarmonics, DATA_PDS, degree, false)
+        
+            for _ in 1:1000
+                pos = rand(3)
+                pos /= norm(pos)
+                radius = 1 
+                μ = 1 
+        
+                fd = ForwardDiff.gradient(x->compute_potential(m, x, μ, radius), pos)
+                an = compute_acceleration(m, pos, μ, radius)
+        
+                @test maximum(abs.(fd-an)) ≤ 1e-14
+            end
+        end
+    
+    end
+    
 end

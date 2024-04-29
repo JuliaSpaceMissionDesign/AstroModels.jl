@@ -222,7 +222,7 @@ function parse_model(
         )
     end
 
-    if !(data.tide_system == :zero_tide)
+    if (typeof(data) == GravityHarmonicsICGEMData) && !(data.tide_system == :zero_tide)
         throw(
             NotImplementedError("tide system '$(d.tide_system)' not supported")
         )

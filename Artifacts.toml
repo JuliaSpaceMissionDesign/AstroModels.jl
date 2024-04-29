@@ -4,3 +4,10 @@ git-tree-sha1 = "08d3017c167477b4c13de8239cbe7ecee07a60c9"
     [[XGM2016.download]]
     sha256 = "00c9117447d18f365e4b8030e9312ca73eed0d07d11534e06fd95b900f49418c"
     url = "https://gist.github.com/andreapasquale94/8692fcaa1e61afd600d29d53b55b4d78/raw/08d3017c167477b4c13de8239cbe7ecee07a60c9.tar.gz"
+
+[JGL100K]
+git-tree-sha1 = "dad6db77e6d222bdc7836804868d3e25518fe163"
+
+    [[JGL100K.download]]
+    sha256 = "62c1114551fb4ba553b9d534d85833ecea754b52fdf94d6e4d11c53546b181af"
+    url = "https://gist.github.com/jackyarndley/2a890c30600a79e3f64ebbb4014ac741/raw/dad6db77e6d222bdc7836804868d3e25518fe163.tar.gz"
