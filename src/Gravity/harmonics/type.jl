@@ -173,7 +173,7 @@ function GravityHarmonics(C::AbstractMatrix{T}, S::AbstractMatrix{T}, deg::Int; 
 
     η0 = zeros(T, deg+2, deg+2)
     η1 = zeros(T, deg+2, deg+2)
-    precompute_coefficients!(η0, η1, deg+2)
+    precompute_coefficients!(η0, η1, deg+1)
     
     ∂η0 = zeros(T, deg+1)
     ∂η1 = zeros(T, deg+1, deg+1)
