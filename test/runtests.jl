@@ -1,10 +1,12 @@
-using Test
+using Test 
 
-@time begin 
-    @testset "Gravity" verbose=true begin
+const GROUP = get(ENV, "GROUP", "All")
+
+@time begin
+    if GROUP == "All" || GROUP == "Gravity"
         include("Gravity/Gravity.jl") 
     end
-    @testset "SRP" verbose=true begin
+    if GROUP == "All" || GROUP == "SRP"
         include("SRP/SRP.jl") 
     end
 end;
