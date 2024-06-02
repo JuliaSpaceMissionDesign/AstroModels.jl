@@ -85,13 +85,13 @@ end
 function precompute_coefficients!(η0, η1, deg)
     # Zonal & tesseral terms 
     η0[1, 1] = 0  
-    @inbounds for n in 1:deg+1
+    @inbounds for n in 1:deg
         η0[n+1, 1] = (n-1)/n
         η0[n+1, n+1] = 2n-1
     end
 
     # Sectorial terms
-    @inbounds for n in 2:deg+1
+    @inbounds for n in 2:deg
         for m in 1:n-1 
             η0[n+1, m+1] = (2n-1)/(n-m)
             η1[n+1, m+1] = (n+m-1)/(n-m)
@@ -222,7 +222,7 @@ function parse_model(
         )
     end
 
-    if !(data.tide_system == :zero_tide)
+    if (typeof(data) == GravityHarmonicsICGEMData) && !(data.tide_system == :zero_tide)
         throw(
             NotImplementedError("tide system '$(d.tide_system)' not supported")
         )
