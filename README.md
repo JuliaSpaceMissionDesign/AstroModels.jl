@@ -7,7 +7,7 @@ The following models are implemented in the package:
 
 ### Gravity
 - [x] Spherical harmonics: ICGEM
-- [x] Spherical harmonics: JPL
+- [x] Spherical harmonics: PDS
 - [x] Polyhedron
 - [x] Point mass
 - [x] Third body
@@ -18,12 +18,10 @@ The following models are implemented in the package:
 ### SRP
 - [x] Cannonball
 - [x] Flat plate model
-- [ ] Ray tracing (TBC)
 
 #### Shadow models
-- [ ] Cylindrical
-- [ ] Conical
-- [ ] Multi plates
+- [x] Cylindrical
+- [x] Conical
 
 ### Atmosphere/drag
 

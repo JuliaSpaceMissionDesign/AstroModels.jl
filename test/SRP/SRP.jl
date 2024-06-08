@@ -57,3 +57,6 @@ end
     
 end;
 
+@testset "Shadow models" verbose=true begin
+    include("shadow.jl")
+end
