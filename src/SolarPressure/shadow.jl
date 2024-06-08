@@ -14,7 +14,7 @@ Shadow function using cylindrical shadow model.
     s = unitvec(src)
 
     # Compute the angle between the body-sun vector and the body-sun vector
-    θ = acos( dot(-occ, s) / on )
+    θ = acos( dot(occ, s) / on )
 
     # The satellite is in eclipse if this angle is less than the 
     # planet's angular radius
