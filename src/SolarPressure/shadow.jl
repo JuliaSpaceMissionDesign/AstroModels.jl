@@ -11,14 +11,14 @@ Shadow function using cylindrical shadow model.
 """
 @fastmath function shadow_cylinder(occ::AbstractVector, src::AbstractVector, R::Number)   
     on = norm(occ)
-    s = unitvec(src - occ)
+    s = unitvec(src)
 
     # Compute the angle between the body-sun vector and the body-sun vector
-    θ = acos( dot(occ, s) / on )
+    θ = acos( dot(-occ, s) / on )
 
     # The satellite is in eclipse if this angle is less than the 
     # planet's angular radius
-    return if θ >= asin(R / on)
+    return if θ ≥ asin(R / on) 
         1.0
     else 
         0.0 
