@@ -7,5 +7,6 @@ module AstroModels
     include("interface.jl")
     include(joinpath("Gravity", "Gravity.jl"))
     include(joinpath("SolarPressure", "SolarPressure.jl"))
+    include(joinpath("Atmosphere", "Atmosphere.jl"))
 
 end
