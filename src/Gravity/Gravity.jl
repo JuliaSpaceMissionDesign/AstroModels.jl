@@ -1,4 +1,4 @@
-module Gravity 
+module Gravity
 
 using Logging
 using LinearAlgebra

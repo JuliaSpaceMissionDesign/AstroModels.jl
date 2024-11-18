@@ -1,5 +1,5 @@
-export AbstractAccelerationModel, AbstractAccelerationModelData, 
-       compute_acceleration
+export AbstractAccelerationModel, AbstractAccelerationModelData,
+    compute_acceleration
 
 abstract type ForceModelData <: AbstractJSMDModelData end
 
@@ -21,4 +21,4 @@ This function serves as an interface for constructing acceleration models.
 !!! warning 
     Concrete implementations of `AbstractAccelerationModel` must provide this function!
 """
-@interface function compute_acceleration(::A, args...) where {A <: AbstractAccelerationModel} end
+@interface function compute_acceleration(::A, args...) where {A<:AbstractAccelerationModel} end

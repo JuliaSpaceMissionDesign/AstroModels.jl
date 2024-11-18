@@ -5,7 +5,7 @@ export GravityHarmonicsICGEMData, GravityHarmonicsPDSData
 
 Abstract type for all spherical harmonics expansion model data.
 """
-abstract type AbstractGravityHarmonicsData{N, T} <: AbstractGravityModelData end
+abstract type AbstractGravityHarmonicsData{N,T} <: AbstractGravityModelData end
 
 # ----------------------------------
 # PDS gravity harmonics data (SHA)
@@ -27,7 +27,7 @@ Data container for spherical harmonics data from the Geosciences Node of NASA's
 ### References 
 - [https://pds-geosciences.wustl.edu/dataserv/gravity\\_model\\_desc.htm](https://pds-geosciences.wustl.edu/dataserv/gravity_model_desc.htm)
 """
-struct GravityHarmonicsPDSData{N, T} <: AbstractGravityHarmonicsData{N, T}
+struct GravityHarmonicsPDSData{N,T} <: AbstractGravityHarmonicsData{N,T}
     μ::T # km³/s²
     radius::T # km
     max_degree::Int
@@ -39,7 +39,7 @@ struct GravityHarmonicsPDSData{N, T} <: AbstractGravityHarmonicsData{N, T}
     Slm::Matrix{T}
 end
 
-function Base.show(io::IO, gd::GravityHarmonicsPDSData{N, T}) where {N, T}
+function Base.show(io::IO, gd::GravityHarmonicsPDSData{N,T}) where {N,T}
     println(io, "GravityHarmonicsPDSData{$N, $T}(norm=$(gd.normalized))")
 end
 
@@ -56,7 +56,7 @@ Parse NASA's PDS SHA file data.
 ### References
 - [https://pds-geosciences.wustl.edu/dataserv/gravity\\_model\\_desc.htm](https://pds-geosciences.wustl.edu/dataserv/gravity_model_desc.htm)
 """
-function parse_pdsfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) where T 
+function parse_pdsfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) where {T}
     line = strip.(split(strip(readline(open(filename, "r"))), ","))
 
     radius = parse(T, line[1])
@@ -65,35 +65,35 @@ function parse_pdsfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) w
     normalized = parse(Int, line[6]) == 1
 
     ref_lon = parse(T, line[7])
-    if ref_lon != zero(T) 
+    if ref_lon != zero(T)
         @warn "Reference longitude for the $filename spherical harmonics model is $ref_lon (deg)"
     end
     ref_lat = parse(T, line[8])
-    if ref_lat != zero(T) 
+    if ref_lat != zero(T)
         @warn "Reference latitude for the $filename spherical harmonics model is $ref_lat (deg)"
-    end 
+    end
 
     # Maximum degree check
-    if maxdegree == -1 
-        maxdegree = deg  
-    end 
+    if maxdegree == -1
+        maxdegree = deg
+    end
 
     # Load delimited file
     raw_sha = readdlm(filename, ','; skipstart=1)
     raw_sha = raw_sha[1:end, :]
 
     # Extract coefficients
-    Clm = zeros(maxdegree+1, maxdegree+1)
-    Slm = zeros(maxdegree+1, maxdegree+1)
-    for row in eachrow(raw_sha) 
-        i = Int(row[1]+1)
-        j = Int(row[2]+1)
-        if i <= maxdegree+1
-            if j <= maxdegree+1
+    Clm = zeros(maxdegree + 1, maxdegree + 1)
+    Slm = zeros(maxdegree + 1, maxdegree + 1)
+    for row in eachrow(raw_sha)
+        i = Int(row[1] + 1)
+        j = Int(row[2] + 1)
+        if i <= maxdegree + 1
+            if j <= maxdegree + 1
                 Clm[i, j] = row[3]
                 Slm[i, j] = row[4]
             end
-        else 
+        else
             break
         end
     end
@@ -109,10 +109,10 @@ Parse data associated to a [`GravityHarmonics`](@ref) model from NASA's PDS SHA 
 
 See also: [`parse_pdsfile`](@ref), [`GravityHarmonicsPDSData`](@ref).
 """
-function parse_data(::Type{T}, ::Type{GravityHarmonicsPDSData}, filename::AbstractString, args...; 
-    maxdegree::Int=-1) where T 
+function parse_data(::Type{T}, ::Type{GravityHarmonicsPDSData}, filename::AbstractString, args...;
+    maxdegree::Int=-1) where {T}
     μ, radius, maxdeg, normalized, Clm, Slm = parse_pdsfile(T, filename; maxdegree=maxdegree)
-    return GravityHarmonicsPDSData{maxdeg, T}(μ, radius, maxdeg, normalized, Clm, Slm)
+    return GravityHarmonicsPDSData{maxdeg,T}(μ, radius, maxdeg, normalized, Clm, Slm)
 end
 
 # -------------------------------------
@@ -135,20 +135,20 @@ Data container for ICGEM spherical harmonics gfc data.
 ### References 
 - [http://icgem.gfz-potsdam.de/ICGEM-Format-2023.pdf](http://icgem.gfz-potsdam.de/ICGEM-Format-2023.pdf)
 """
-struct GravityHarmonicsICGEMData{N, T} <: AbstractGravityHarmonicsData{N, T}
+struct GravityHarmonicsICGEMData{N,T} <: AbstractGravityHarmonicsData{N,T}
     μ::T # km³/s²
     radius::T # km
     max_degree::Int
 
-    normalized::Bool 
-    tide_system::Symbol 
+    normalized::Bool
+    tide_system::Symbol
 
     # Coefficients
     Clm::Matrix{T}
     Slm::Matrix{T}
 end
 
-function Base.show(io::IO, gd::GravityHarmonicsICGEMData{N, T}) where {N, T}
+function Base.show(io::IO, gd::GravityHarmonicsICGEMData{N,T}) where {N,T}
     println(io, "GravityHarmonicsICGEMData{$N, $T}(norm=$(gd.normalized), tide=$(gd.tide_system))")
 end
 
@@ -165,15 +165,15 @@ Parse an International Centre for Global Earth Models `gfc` model file.
 ### References
 - [http://icgem.gfz-potsdam.de/ICGEM-Format-2023.pdf](http://icgem.gfz-potsdam.de/ICGEM-Format-2023.pdf)
 """
-function parse_gfcfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) where T 
-    
+function parse_gfcfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) where {T}
+
     file = open(filename, "r")
 
     # --------------------------------------------------------------------------------------
     # Parse header 
-    header_line_start = 1 
-    header_line_end = 0 
-    current_line = 0 
+    header_line_start = 1
+    header_line_end = 0
+    current_line = 0
     boh_found = false # begin of head found, optional
     eoh_found = false # end of head found, required
     header = String[]
@@ -187,21 +187,22 @@ function parse_gfcfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) w
         length(line) < 1 && continue
 
         if line[1] == "begin_of_head"
-            if boh_found 
+            if boh_found
                 throw(
                     LoadError(
-                        filename, current_line, 
+                        filename, current_line,
                         "Invalid ICGEM format: two `begin_of_head` keywords found!"
                     )
                 )
-            end 
+            end
             header_line_start = current_line
-            boh_found = true 
+            boh_found = true
         elseif line[1] == "end_of_head"
             eoh_found = true
-            header_line_end   = current_line
+            header_line_end = current_line
             break
-        else boh_found && (current_line != header_line_start)
+        else
+            boh_found && (current_line != header_line_start)
             push!(header, join(line, " "))
         end
     end
@@ -216,7 +217,7 @@ function parse_gfcfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) w
         )
     end
 
-    DATA =  Dict(
+    DATA = Dict(
         :product_type => :unknown, :modelname => :unknown, :gravity_constant => zero(T),
         :radius => zero(T), :max_degree => 0, :tide_system => :zero_tide,
         :norm => :fully_normalized,
@@ -231,14 +232,14 @@ function parse_gfcfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) w
     for k in MANDATORY_KEYS
         m = match(Regex("$(k) .*[\\d\\w]"), jheader)
 
-        if m === nothing 
+        if m === nothing
             throw(ErrorException("Invalid ICGEM format: no keyword $k found!"))
         end
 
         matched = split(m.match)
         if k in (:gravity_constant, :radius, :max_degree)
             DATA[k] = parse(Float64, replace(matched[2], r"[D,d]" => "e"))
-        else 
+        else
             DATA[k] = Symbol(split(matched[2], ".")[1])
         end
     end
@@ -251,7 +252,7 @@ function parse_gfcfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) w
     for k in (:tide_system, :norm)
         m = match(Regex("$(k) .*[\\d\\w]"), jheader)
 
-        if m !== nothing 
+        if m !== nothing
             matched = split(m.match)
             if matched[1] == "tide_system"
                 DATA[k] = Symbol(matched[2])
@@ -271,19 +272,19 @@ function parse_gfcfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) w
 
     # --------------------------------------------------------------------------------------
     # Read coefficients
-    raw = readdlm(filename; skipstart=header_line_end+1)
+    raw = readdlm(filename; skipstart=header_line_end + 1)
 
-    deg = Int(DATA[:max_degree])  
+    deg = Int(DATA[:max_degree])
     # Maximum degree check
-    if maxdegree == -1 
+    if maxdegree == -1
         maxdegree = deg
-    elseif maxdegree > deg 
+    elseif maxdegree > deg
         throw(
             ArgumentError(
                 "Maximum degree provided ($maxdegree) is greater than the one in the file ($deg)."
             )
         )
-    end 
+    end
 
     # Check if there is any number to be converted. In this case, we assume that
     # the number is written in FORTRAN format.
@@ -291,7 +292,7 @@ function parse_gfcfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) w
     for i in eachindex(raw_coefs)
         if !(typeof(raw_coefs[i]) <: AbstractFloat)
             try
-                data             = replace(raw_coefs[i], r"[D,d]" => "e")
+                data = replace(raw_coefs[i], r"[D,d]" => "e")
                 raw_coefs[i] = parse(T, data)
             catch e
                 throw(
@@ -305,15 +306,15 @@ function parse_gfcfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) w
 
     # Parse the coefficients matrices
     # At the moment only STATIC coefficients (in time) are considered
-    Clm = zeros(maxdegree+1, maxdegree+1)
-    Slm = zeros(maxdegree+1, maxdegree+1)
+    Clm = zeros(maxdegree + 1, maxdegree + 1)
+    Slm = zeros(maxdegree + 1, maxdegree + 1)
     for row in eachrow(raw)
         # looping over gfc or gfct lines only
         if row[1] in ("gfc", "gfct")
-            i = row[2]+1
-            j = row[3]+1
-            if i <= maxdegree+1
-                if j <= maxdegree+1
+            i = row[2] + 1
+            j = row[3] + 1
+            if i <= maxdegree + 1
+                if j <= maxdegree + 1
                     Clm[i, j] = row[4]
                     Slm[i, j] = row[5]
                 end
@@ -323,11 +324,11 @@ function parse_gfcfile(::Type{T}, filename::AbstractString; maxdegree::Int=-1) w
 
 
     return (
-        DATA[:gravity_constant]/1e9, # to km^3/s^2
-        DATA[:radius]/1e3, # to km 
-        maxdegree, 
-        DATA[:norm] == :fully_normalized, 
-        DATA[:tide_system], 
+        DATA[:gravity_constant] / 1e9, # to km^3/s^2
+        DATA[:radius] / 1e3, # to km 
+        maxdegree,
+        DATA[:norm] == :fully_normalized,
+        DATA[:tide_system],
         Clm, Slm
     )
 end
@@ -341,8 +342,8 @@ Earth Models `gfc` models.
 
 See also: [`parse_gfcfile`](@ref), [`GravityHarmonicsICGEMData`](@ref).
 """
-function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::AbstractString, args...; 
-    maxdegree::Int=-1) where T 
+function parse_data(::Type{T}, ::Type{GravityHarmonicsICGEMData}, filename::AbstractString, args...;
+    maxdegree::Int=-1) where {T}
     μ, radius, maxdeg, normalized, tide, Clm, Slm = parse_gfcfile(T, filename; maxdegree=maxdegree)
-    return GravityHarmonicsICGEMData{maxdeg, T}(μ, radius, maxdeg, normalized, tide, Clm, Slm)
+    return GravityHarmonicsICGEMData{maxdeg,T}(μ, radius, maxdeg, normalized, tide, Clm, Slm)
 end

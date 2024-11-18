@@ -20,31 +20,31 @@ take into account possible auto occultation between the different plates.
 - Zardain, L., Farrés, A., & Puig, A. (2020). High-fidelity modeling and visualizing of 
   solar radiation pressure: a framework for high-fidelity analysis. UMBC Faculty Collection.
 """
-@fastmath function compute_srp_flatplate(ρsi, ρdi, Ai, M, P, ni::AbstractVector{<:Number}, 
-    us::AbstractVector{<:Number}) 
+@fastmath function compute_srp_flatplate(ρsi, ρdi, Ai, M, P, ni::AbstractVector{<:Number},
+    us::AbstractVector{<:Number})
     # Compute unit vectors and illumination
-    cosθ = us[1]*ni[1] + us[2]*ni[2] + us[3]*ni[3]
+    cosθ = us[1] * ni[1] + us[2] * ni[2] + us[3] * ni[3]
 
     if cosθ < 0
         # Compute acceleration components along sun and normal direction
-        as = (1-ρsi) * us 
-        an = 2*(ρsi*cosθ + ρdi/3) * ni
+        as = (1 - ρsi) * us
+        an = 2 * (ρsi * cosθ + ρdi / 3) * ni
 
         # Compute total acceleration
         # Zardain, eq. 5
-        return - P * Ai/M * cosθ * ( as + an )
-    else 
-        return 0 * us 
+        return -P * Ai / M * cosθ * (as + an)
+    else
+        return 0 * us
     end
 end
 
-@fastmath function compute_srp_flatplate(ρsi, ρdi, Ai, M, ni::AbstractVector{<:Number}, 
+@fastmath function compute_srp_flatplate(ρsi, ρdi, Ai, M, ni::AbstractVector{<:Number},
     s::AbstractVector{<:Number}; pressure=INVERSE_SQUARE_SUN_PRESSURE)
     # Compute pressure
     sv = SVector{3}(s[1], s[2], s[3])
-    svn = sqrt(sv[1]*sv[1] + sv[2]*sv[2] + sv[3]*sv[3])
-    us = sv/svn
+    svn = sqrt(sv[1] * sv[1] + sv[2] * sv[2] + sv[3] * sv[3])
+    us = sv / svn
     P = compute_srp_pressure(pressure, svn)
     # Compute acceleration
-    return compute_srp_flatplate(ρsi, ρdi, Ai, M, P, ni, us) 
+    return compute_srp_flatplate(ρsi, ρdi, Ai, M, P, ni, us)
 end

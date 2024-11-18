@@ -1,10 +1,7 @@
 module Atmosphere
-    
-    using JSMDInterfaces.Models: AbstractJSMDModelData
 
-    include("interface.jl")
+using JSMDInterfaces.Models: AbstractJSMDModel
 
-    include("cira72/constants.jl")
-    include("cira72/type.jl")
+include("interface.jl")
 
 end

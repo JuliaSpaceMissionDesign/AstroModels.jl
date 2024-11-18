@@ -26,37 +26,37 @@ Constructs a `GravityPolyhedron` type from a [`GravityPolyhedronData`](@ref) obj
   Celestial Mechanics and Dynamical Astronomy, 65, 313-344.
 """
 struct GravityPolyhedron{T} <: AbstractGravityModel{T}
-    vertices::Vector{SVector{3, T}}
+    vertices::Vector{SVector{3,T}}
     faces::Vector{FaceProperties{T}}
     edges::Vector{EdgeProperties{T}}
 end
 
-function GravityPolyhedron{N}(p::GravityPolyhedronData{T}) where {N, T}
+function GravityPolyhedron{N}(p::GravityPolyhedronData{T}) where {N,T}
     faces_prop = Vector{FaceProperties{T}}()
     for f in eachindex(faces(p))
         push!(
-            faces_prop, 
+            faces_prop,
             FaceProperties(p, f)
         )
     end
     edges_prop = Vector{EdgeProperties{T}}()
     for e in keys(edges(p))
         push!(
-            edges_prop, 
+            edges_prop,
             EdgeProperties(p, e, faces_prop)
         )
     end
     return GravityPolyhedron{N}(p.vertices, faces_prop, edges_prop)
 end
 
-GravityPolyhedron(p::GravityPolyhedronData{T}) where T = GravityPolyhedron{T}(p)
+GravityPolyhedron(p::GravityPolyhedronData{T}) where {T} = GravityPolyhedron{T}(p)
 
-function parse_model(::Type{T}, ::Type{GravityPolyhedron}, data::GravityPolyhedronData{N}, 
-    args...) where {N, T}
+function parse_model(::Type{T}, ::Type{GravityPolyhedron}, data::GravityPolyhedronData{N},
+    args...) where {N,T}
     return GravityPolyhedron{T}(data)
 end
 
-function parse_model(::Type{T}, ::Type{GravityPolyhedron}, filename::AbstractString, 
+function parse_model(::Type{T}, ::Type{GravityPolyhedron}, filename::AbstractString,
     args...) where {T}
     data = GravityPolyhedronData{T}(filename)
     return GravityPolyhedron{T}(data)

@@ -26,4 +26,4 @@ This function serves as an interface for constructing gravitational potentials m
 !!! warning 
     Concrete implementations of `AbstractGravityModel` must provide this function!
 """
-@interface function compute_potential(::A, args...) where {A <: AbstractGravityModel} end
+@interface function compute_potential(::A, args...) where {A<:AbstractGravityModel} end

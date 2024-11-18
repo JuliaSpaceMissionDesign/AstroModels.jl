@@ -2,8 +2,8 @@ export compute_srp_cannonball
 
 
 @fastmath function _cannonball(ρ, A, M, P, sm, s)
-    sm3 = sm*sm*sm
-    return (1+ρ)*P*A/M * s/sm3
+    sm3 = sm * sm * sm
+    return (1 + ρ) * P * A / M * s / sm3
 end
 
 """
@@ -33,15 +33,15 @@ Sun Pressure.
 - Zardain, L., Farrés, A., & Puig, A. (2020). High-fidelity modeling and visualizing of 
   solar radiation pressure: a framework for high-fidelity analysis. UMBC Faculty Collection.
 """
-@fastmath function compute_srp_cannonball(ρ, A, M, P, s::AbstractVector{<:Number})  
+@fastmath function compute_srp_cannonball(ρ, A, M, P, s::AbstractVector{<:Number})
     sv = SVector{3}(s[1], s[2], s[3])
-    svn = sqrt(sv[1]*sv[1] + sv[2]*sv[2] + sv[3]*sv[3])
+    svn = sqrt(sv[1] * sv[1] + sv[2] * sv[2] + sv[3] * sv[3])
     return _cannonball(ρ, A, M, P, svn, sv)
 end
 
-function compute_srp_cannonball(ρ, A, M, s::AbstractVector{<:Number}; pressure = INVERSE_SQUARE_SUN_PRESSURE)
+function compute_srp_cannonball(ρ, A, M, s::AbstractVector{<:Number}; pressure=INVERSE_SQUARE_SUN_PRESSURE)
     sv = SVector{3}(s[1], s[2], s[3])
-    svn = sqrt(sv[1]*sv[1] + sv[2]*sv[2] + sv[3]*sv[3])
+    svn = sqrt(sv[1] * sv[1] + sv[2] * sv[2] + sv[3] * sv[3])
     P = compute_srp_pressure(pressure, svn)
     return _cannonball(ρ, A, M, P, svn, sv)
 end
